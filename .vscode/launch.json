@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/dist/app.js",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "*-module"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "sourceMaps": true,
+      "outDir": "${workspaceRoot}/dist"
+    },
+        {
+      "name": "Server - External",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/dist/app.js",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "*-module"
+      },
+      "externalConsole": true,
+      "sourceMaps": true,
+      "outDir": "${workspaceRoot}/dist"
+    },
+    {
+      "name": "Debug Mocha",
+      "type": "node",
+      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "args": ["**/*.js"],
+      "request": "launch",
+      "cwd": "${workspaceRoot}/tests",
+      "runtimeArgs": [
+      ],
+      "sourceMaps": true
+    }
+  ]
+}

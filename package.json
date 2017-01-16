@@ -1,0 +1,25 @@
+{
+  "name": "multiplayer-maze-server",
+  "version": "0.1.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:alexdmejias/multiplayer-maze-server.git"
+  },
+  "scripts": {
+    "start": "node dist/app.js",
+    "build": "tsc -p src/ --pretty",
+    "watch": "tsc -p src/ -w --pretty"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.0",
+    "source-map-support": "^0.4.8",
+    "typescript": "^2.1.5"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "morgan": "^1.7.0",
+    "request": "^2.79.0",
+    "socket.io": "^1.7.2"
+  }
+}
