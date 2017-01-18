@@ -1,34 +1,25 @@
-// declare function require(name: string);
 require('source-map-support').install();
 
 import * as express from 'express';
 import * as http from 'http';
 import * as chalk from 'chalk';
 
+import config from './config';
 import Utils from './utils';
 import {IPlayersObj, IConfig} from './_interfaces';
+
+const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 
 const playersArr: string[] = [];
 const playersObj: IPlayersObj = {};
 
-
-const config: IConfig = {
-  scoreIncrementer: 1,
-  roundDuration: 5000,
-  port: 3005
-}
-
 const utils = new Utils(playersArr, playersObj, config);
 
-const app = express();
-
-
-const server = http.createServer(app);
 server.listen(config.port, function() {
   console.log(chalk.bgRed.black(`listing on port: ${config.port}`));
 });
-
-const io = require('socket.io')(server);
 
 io.on('connection', function (socket) {
   utils._addPlayer(socket.id);
