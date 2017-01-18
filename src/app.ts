@@ -14,10 +14,17 @@ server.listen(port, function() {
   console.log(chalk.bgRed.black(`listing on port: ${port}`));
 });
 
+interface IPlayer {
+  currentScore: number;
+}
+
 const io = require('socket.io')(server);
 
 const playersConnected: string[] = [];
-const playersConnectedObj = {};
+const playersConnectedObj: {[s: string]:  IPlayer } = {};
+
+const SCORE_INCREMENTER = 1;
+
 
 function _removePlayer (playerId: string): boolean {
   const playerIdIndex: number = playersConnected.indexOf(playerId);
@@ -27,7 +34,7 @@ function _removePlayer (playerId: string): boolean {
 
     if (playersConnectedObj[playerId]) {
       delete playersConnectedObj[playerId];
-      console.log(chalk.bgGreen(`player:disconnected - ${playerId}`));
+      _ddp('disconnected', playerId);
       
       return true;
     } else {
@@ -46,9 +53,11 @@ function _addPlayer (playerId: string) {
     playersConnected.push(playerId);
 
     if (!playersConnectedObj[playerId]) {
-      playersConnectedObj[playerId] = {};
+      playersConnectedObj[playerId] = {
+        currentScore: 0
+      };
 
-      console.log(chalk.bgGreen(`player:connected - ${playerId}`));
+      _ddp('connected', playerId);
       return true;
     } else {
       console.log(chalk.bgYellow.black(`failed to add player`));
@@ -61,6 +70,28 @@ function _addPlayer (playerId: string) {
   }
 }
 
+/**
+ * Helper function to debug player messages
+ */
+function _ddp (message: string, playerId: string) {
+  console.log(chalk.bgGreen(`player:${message} - ${playerId}`));
+}
+
+function _findPlayer (playerId: string) {
+  return playersConnectedObj[playerId] || {};
+}
+
+function _playerScored (playerId: string): number {
+  const player = _findPlayer(playerId);
+  if (player) {
+    playersConnectedObj[playerId].currentScore += SCORE_INCREMENTER;
+
+    return playersConnectedObj[playerId].currentScore;
+  } else {
+    return -1;
+  }
+}
+
 io.on('connection', function (socket) {
   _addPlayer(socket.id);
 
@@ -69,6 +100,7 @@ io.on('connection', function (socket) {
   })
 
   socket.on('playerScored', (data) => {
-    console.log(chalk.bgGreen(`player:scored - ${socket.id}`));
+    _ddp('scored', socket.id);
+    _playerScored(socket.id);
   });
 });
