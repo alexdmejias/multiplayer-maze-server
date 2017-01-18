@@ -1,0 +1,85 @@
+import * as chalk from 'chalk';
+
+import {IPlayersObj, IPlayer, IConfig} from './_interfaces';
+
+class Utils {
+
+  playersObj: IPlayersObj = {};
+  playersArr: string[];
+  config: IConfig;
+
+  constructor(playersArrArg: string[], playersObjArg: IPlayersObj, configArg: IConfig) {
+    this.config = configArg;
+    this.playersArr = playersArrArg;
+    this.playersObj = playersObjArg;
+  }
+
+  /**
+  * Helper function to debug player messages
+  */
+  _ddp (message: string, playerId: string) {
+    console.log(chalk.bgGreen(`player:${message} - ${playerId}`));
+  }
+
+  _findPlayer (playerId: string) {
+    return this.playersObj[playerId] || {};
+  }
+
+  _playerScored (playerId: string): number {
+    const player = this._findPlayer(playerId);
+    if (player) {
+      this.playersObj[playerId].currentScore += this.config.scoreIncrementer;
+
+      return this.playersObj[playerId].currentScore;
+    } else {
+      return -1;
+    }
+  }
+
+  _removePlayer (playerId: string): boolean {
+    const playerIdIndex: number = this.playersArr.indexOf(playerId);
+
+    if ( playerIdIndex > -1) {
+      this.playersArr.splice(playerIdIndex, 1);
+
+      if (this.playersObj[playerId]) {
+        delete this.playersObj[playerId];
+        this._ddp('disconnected', playerId);
+
+        return true;
+      } else {
+        console.log(chalk.bgYellow.black(`failed to remove player 1`));
+        return false;
+      }
+    } else {
+      console.log(chalk.bgYellow.black(`failed to remove player 2`));
+      return false;
+    }
+
+  }
+
+  _addPlayer (playerId: string) {
+    if (this.playersArr.indexOf(playerId) < 0) {
+      this.playersArr.push(playerId);
+
+      if (!this.playersObj[playerId]) {
+        this.playersObj[playerId] = {
+          currentScore: 0
+        };
+
+        this._ddp('connected', playerId);
+        return true;
+      } else {
+        console.log(chalk.bgYellow.black(`failed to add player`));
+        return false;
+      }
+
+    } else {
+      console.log(chalk.bgYellow.black(`failed to add player`));
+      return false;
+    }
+  }
+  
+}
+
+export default Utils;
