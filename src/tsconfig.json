@@ -6,7 +6,7 @@
     "outDir": "../dist/",
     "removeComments": false,
     "declaration": true,
-    "strictNullChecks": true
+    "strictNullChecks": false
   },
   "exclude": [
     "../tests"

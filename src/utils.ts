@@ -25,12 +25,23 @@ class Utils {
     return this.playersObj[playerId] || {};
   }
 
-  _playerScored (playerId: string): number {
+  _playerScored (playerId: string): IPlayer | number{
     const player = this._findPlayer(playerId);
     if (player) {
       this.playersObj[playerId].currentScore += this.config.scoreIncrementer;
 
       return this.playersObj[playerId].currentScore;
+    } else {
+      return -1;
+    }
+  }
+
+  _changePlayerAttr (playerId: string, attribute: string, value: any): IPlayer | number {
+    const player = this._findPlayer(playerId);
+    if (player) {
+      this.playersObj[playerId][attribute] = value;
+
+      return this.playersObj[playerId];
     } else {
       return -1;
     }
