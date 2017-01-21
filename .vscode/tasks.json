@@ -19,6 +19,15 @@
       "taskName": "test",
       "isTestCommand": true,
       "args": ["run", "test"]
+    },
+    {
+      "taskName": "build",
+      "isBuildCommand": true,
+      "args": ["run", "build"]
+    },
+    {
+      "taskName": "bstart",
+      "args": ["run", "bstart"]
     }
   ]
 }

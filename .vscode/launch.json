@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Server",
+      "name": "Launch CLI",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceRoot}/dist/app.js",
+      "program": "${workspaceRoot}/dist/cli.js",
       "stopOnEntry": false,
       "args": [],
       "cwd": "${workspaceRoot}",
@@ -17,12 +17,37 @@
         "NODE_ENV": "development",
         "DEBUG": "*-module"
       },
-      "console": "integratedTerminal",
+      "console": "internalConsole",
       "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "build",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ]
+    },
+    {
+      "name": "Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/dist/app.js",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": null,
+      "preLaunchTask": "build",
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "*-module"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "openOnFirstSessionStart",
       "sourceMaps": true,
       "outDir": "${workspaceRoot}/dist"
     },
-        {
+    {
       "name": "Server - External",
       "type": "node",
       "request": "launch",
@@ -41,17 +66,6 @@
       "externalConsole": true,
       "sourceMaps": true,
       "outDir": "${workspaceRoot}/dist"
-    },
-    {
-      "name": "Debug Mocha",
-      "type": "node",
-      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-      "args": ["**/*.js"],
-      "request": "launch",
-      "cwd": "${workspaceRoot}/tests",
-      "runtimeArgs": [
-      ],
-      "sourceMaps": true
     }
   ]
 }
