@@ -1,6 +1,6 @@
 import {IGrid, ICell} from '../../_interfaces';
 
-export default (grid: IGrid, size: number) => {
+export default (grid: IGrid, size: number): IGrid => {
   grid.grid.forEach((row, rowIndex) => {
     row.forEach((cell, cellIndex) => {
       let neighbors = [];

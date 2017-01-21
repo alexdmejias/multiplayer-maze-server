@@ -5,7 +5,7 @@ class Cell implements ICell {
   column: number;
   id: string;
   distance: number;
-  // neighbors: {[k:string]: ICell};
+  neighbors: {[k:string]: ICell} = {};
 
   links = {};
   constructor (rowArg: number, columnArg: number) {
@@ -23,6 +23,16 @@ class Cell implements ICell {
   // instead of creating a getter for each direction
   getNeighbors (direction): ICell {
     return this.neighbors[direction];
+  }
+
+  getAllNeighbors (): ICell[] {
+    const list = [];
+    for (let direction in this.neighbors) {
+      if (this.neighbors[direction]) {
+        list.push(direction);
+      }
+    }
+    return list;
   }
 
   setLink (cell, bidirectional = true) {
@@ -69,16 +79,6 @@ class Cell implements ICell {
 
   setDistance (dis) {
     this.distance = dis;
-  }
-
-  neighbors () {
-    const list = [];
-    for (let direction in this.neighbors) {
-      if (this.neighbors.hasOwnProperty(direction)) {
-        list.push(direction);
-      }
-    }
-    return list;
   }
 
 }

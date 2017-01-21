@@ -40,13 +40,13 @@ class Grid implements IGrid {
     });
   }
 
-  getCell (row, column): Cell {
+  getCell (row, column): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
   }
 
-  randomCell (): Cell {
+  randomCell (): ICell {
     const row = Math.floor(Math.random() * this.rows);
     const column = Math.floor(Math.random() * this.columns);
 
@@ -55,10 +55,6 @@ class Grid implements IGrid {
 
   size (): number {
     return this.rows * this.columns;
-  }
-
-  eachRow () {
-    return this.grid;
   }
 
   eachCell () {
@@ -75,7 +71,7 @@ class Grid implements IGrid {
 
     while (frontier.length > 0) {
       const newFrontier = [];
-      
+
       frontier.forEach((currCell) => {
         currCell.getLinksIds().forEach((currLink) => {
           if (!distances.get(currLink)) {
