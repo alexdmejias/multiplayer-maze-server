@@ -18,7 +18,7 @@
         "DEBUG": "*-module"
       },
       "console": "internalConsole",
-      "internalConsoleOptions": "neverOpen",
+      "internalConsoleOptions": "openOnSessionStart",
       "preLaunchTask": "build",
       "sourceMaps": true,
       "outFiles": [
