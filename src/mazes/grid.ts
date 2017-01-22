@@ -7,15 +7,15 @@ class Grid implements IGrid {
   columns: number;
   grid: ICell[][];
 
-  constructor (rows: number, columns: number) {
+  constructor (rows: number, columns: number, algorithm?: Function) {
     this.rows = rows;
     this.columns = columns;
 
-    this.grid = this.prepareGrid();
-    this.configureCells();
+    // this.grid = this.createMatrix();
+    this.configureCells(algorithm);
   }
 
-  prepareGrid (): Cell[][] {
+  createMatrix (): Cell[][] {
     const grid: Cell[][] = [];
     for (var i = 0; i < this.rows; i++) {
       grid.push([]);
@@ -27,17 +27,25 @@ class Grid implements IGrid {
     return grid;
   }
 
-  configureCells () {
-    this.eachCell().forEach((cell) => {
-      const {row, column} = cell;
+  configureCells (algorithm?: Function): void {
+    this.grid = this.createMatrix();
 
-      cell.id = `${row}-${column}`;
+    this.grid.forEach((row) => {
+      row.forEach((cell) => {
+        const {row, column} = cell;
 
-      cell.setNeighbors('north', this.getCell(row - 1, column));
-      cell.setNeighbors('south', this.getCell(row + 1, column));
-      cell.setNeighbors('west', this.getCell(row, column - 1));
-      cell.setNeighbors('east', this.getCell(row, column + 1));
+        cell.id = `${row}-${column}`;
+
+        cell.setNeighbors('north', this.getCell(row - 1, column));
+        cell.setNeighbors('south', this.getCell(row + 1, column));
+        cell.setNeighbors('west', this.getCell(row, column - 1));
+        cell.setNeighbors('east', this.getCell(row, column + 1));
+      });
     });
+
+    if (algorithm) {
+      algorithm(this, 10);
+    }
   }
 
   getCell (row, column): ICell {
