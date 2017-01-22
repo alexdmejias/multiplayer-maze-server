@@ -88,18 +88,28 @@ class Grid implements IGrid {
   }
 
   print (): string {
-    let maze: string = '';
+    let output = `+${('---+').repeat(this.columns)}\n`;
+    this.grid.forEach((row: ICell[]) => {
+      let top = '|';
+      let bottom = '+';
+      row.forEach((cell: ICell) => {
+        // if (!cell) {
+        //   let cell = new Cell(-1, -1);
+        // }
 
-    maze += ' _ '.repeat(this.rows);
-    this.grid.forEach((row) => {
-      maze += '\n';
-      row.forEach((column) => {
-        maze += '| '
-      })
-      maze += ' _ '.repeat(this.rows);
-    })
+        let body = '   ';
+        let eastBoundry = (cell.isLinked(cell.neighbors.east) ? ' ' : '|');
+        top += body + eastBoundry;
 
-    return maze;
+        let southBoundry = (cell.isLinked(cell.neighbors.south) ? '   ' : '---');
+        let corner  = '+';
+        bottom += southBoundry + corner;
+      });
+      output += top + '\n';
+      output += bottom + '\n';
+
+    });
+    return output;
   }
 
 }
