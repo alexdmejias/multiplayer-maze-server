@@ -57,10 +57,6 @@ class Cell implements ICell {
     return Object.keys(this.links);
   }
 
-  // getLinks () {
-  //   return Object.values(this.links);
-  // }
-
   getLink (id) {
     return this.links[id];
   }

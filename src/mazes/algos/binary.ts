@@ -29,28 +29,3 @@ export default (grid: IGrid, size: number): IGrid => {
 
   return grid;
 };
-
-export function binaryToStr (preparedGrid: IGrid): string {
-  let output = `+${('---+').repeat(preparedGrid.columns)}\n`;
-  preparedGrid.grid.forEach((row: ICell[]) => {
-    let top = '|';
-    let bottom = '+';
-    row.forEach((cell: ICell) => {
-      // if (!cell) {
-      //   let cell = new Cell(-1, -1);
-      // }
-
-      let body = '   ';
-      let eastBoundry = (cell.isLinked(cell.neighbors.east) ? ' ' : '|');
-      top += body + eastBoundry;
-
-      let southBoundry = (cell.isLinked(cell.neighbors.south) ? '   ' : '---');
-      let corner  = '+';
-      bottom += southBoundry + corner;
-    });
-    output += top + '\n';
-    output += bottom + '\n';
-
-  });
-  return output;
-}
