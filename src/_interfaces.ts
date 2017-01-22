@@ -17,7 +17,8 @@ export interface IConfig {
 export interface IGrid {
   grid: ICell[][];
   rows: number;
-  columns;  
+  columns;
+  print (): string;
 }
 
 export interface ICellNeighbors {
@@ -43,7 +44,4 @@ export interface ICell {
   isLinked (cell: ICell);
   setNeighbors (direction: string, neighbors: ICell);
   getNeighbors (direction: string): ICell;
-
-
-
 }
