@@ -10,7 +10,8 @@
     "start": "node dist/app.js",
     "build": "tsc -p src/ --pretty",
     "watch": "tsc -p src/ -w --pretty",
-    "bstart": "npm run build && npm run start"
+    "bstart": "npm run build && npm run start",
+    "cli": "node dist/cli.js"
   },
   "devDependencies": {
     "@types/node": "^7.0.0",
