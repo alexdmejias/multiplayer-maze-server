@@ -11,7 +11,6 @@ class Grid implements IGrid {
     this.rows = rows;
     this.columns = columns;
 
-    // this.grid = this.createMatrix();
     this.configureCells(algorithm);
   }
 
@@ -101,10 +100,6 @@ class Grid implements IGrid {
       let top = '|';
       let bottom = '+';
       row.forEach((cell: ICell) => {
-        // if (!cell) {
-        //   let cell = new Cell(-1, -1);
-        // }
-
         let body = '   ';
         let eastBoundry = (cell.isLinked(cell.neighbors.east) ? ' ' : '|');
         top += body + eastBoundry;
