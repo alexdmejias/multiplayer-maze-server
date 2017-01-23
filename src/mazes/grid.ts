@@ -39,6 +39,12 @@ class Grid implements IGrid {
         cell.setNeighbors('south', this.getCell(row + 1, column));
         cell.setNeighbors('west', this.getCell(row, column - 1));
         cell.setNeighbors('east', this.getCell(row, column + 1));
+
+        cell.position = {
+          top: (cell.row * 10),
+          left: (cell.column * 10)
+        };
+        
       });
     });
 

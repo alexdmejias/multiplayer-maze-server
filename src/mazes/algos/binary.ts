@@ -1,6 +1,6 @@
 import {IGrid, ICell} from '../../_interfaces';
 
-export default (grid: IGrid, size: number): IGrid => {
+export default (grid: IGrid): IGrid => {
   grid.grid.forEach((row, rowIndex) => {
     row.forEach((cell, cellIndex) => {
       let neighbors = [];
@@ -20,10 +20,6 @@ export default (grid: IGrid, size: number): IGrid => {
         cell.setLink(neighbor);
       }
 
-      cell.position = {
-        top: (cell.row * size),
-        left: (cell.column * size)
-      };
     });
   });
 
