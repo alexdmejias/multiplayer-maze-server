@@ -30,6 +30,7 @@ export interface ICellNeighbors {
 
 export interface ICell {
   neighbors: any;
+  neighborsId?: number;
   column: number;
   row: number;
   id: string;

@@ -6,12 +6,13 @@ class Grid implements IGrid {
   rows: number;
   columns: number;
   grid: ICell[][];
+  allCellConnections: number[][];
 
   constructor (rows: number, columns: number, algorithm?: Function) {
     this.rows = rows;
     this.columns = columns;
 
-    this.configureCells(algorithm);
+    this.allCellConnections = this.configureCells(algorithm);
   }
 
   createMatrix (): Cell[][] {
@@ -26,10 +27,11 @@ class Grid implements IGrid {
     return grid;
   }
 
-  configureCells (algorithm?: Function): void {
+  configureCells (algorithm?: Function): number[][] {
     this.grid = this.createMatrix();
-
+    let gridConnections = [];
     this.grid.forEach((row) => {
+      const rowConnections = [];
       row.forEach((cell) => {
         const {row, column} = cell;
 
@@ -44,19 +46,38 @@ class Grid implements IGrid {
           top: (cell.row * 10),
           left: (cell.column * 10)
         };
-        
+
+        rowConnections.push(0);
+        cell.neighborsId = 0;
       });
+
+      gridConnections.push(rowConnections);
     });
 
     if (algorithm) {
-      algorithm(this, 10);
+      gridConnections = algorithm(this, 10);
     }
+
+    return gridConnections;
   }
 
   getCell (row, column): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
+  }
+
+  allCellConnectionsAsStr (): string {
+    // let s = '';
+    // this.allCellConnections.forEach(row => {
+    //   s += row.join('') + '|';
+    // });
+
+    return this.allCellConnections.reduce((prev, row) => {
+      return prev + row.join('') + '|';
+    }, '')
+
+    // return s;
   }
 
   randomCell (): ICell {
@@ -101,17 +122,17 @@ class Grid implements IGrid {
   }
 
   print (): string {
-    let output = `+${('---+').repeat(this.columns)}\n`;
+    let corner  = '+';
+    let output = `${corner}${('---' + corner).repeat(this.columns)}\n`;
     this.grid.forEach((row: ICell[]) => {
       let top = '|';
-      let bottom = '+';
+      let bottom = corner;
       row.forEach((cell: ICell) => {
-        let body = '   ';
-        let eastBoundry = (cell.isLinked(cell.neighbors.east) ? ' ' : '|');
+        let body = ` ${cell.neighborsId} `;
+        let eastBoundry = (cell.isLinked(cell.neighbors.east) ? '⇢' : '|');
         top += body + eastBoundry;
 
-        let southBoundry = (cell.isLinked(cell.neighbors.south) ? '   ' : '---');
-        let corner  = '+';
+        let southBoundry = (cell.isLinked(cell.neighbors.south) ? ' ⇡ ' : '---');
         bottom += southBoundry + corner;
       });
       output += top + '\n';

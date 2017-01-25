@@ -14,4 +14,5 @@ inquirer.prompt([{
   .then((answers) => {
     const grid = new Grid(10, 10, algos[answers.algo]);
     console.log(grid.print());
+    console.log(grid.allCellConnectionsAsStr())
   });
