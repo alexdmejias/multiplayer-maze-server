@@ -67,17 +67,16 @@ class Grid implements IGrid {
     }
   }
 
+  /**
+   * Returns a string which is a combination of all the grids cells connections
+   *
+   * @returns {string}
+   *
+   */
   allCellConnectionsAsStr (): string {
-    // let s = '';
-    // this.allCellConnections.forEach(row => {
-    //   s += row.join('') + '|';
-    // });
-
     return this.allCellConnections.reduce((prev, row) => {
       return prev + row.join('') + '|';
-    }, '')
-
-    // return s;
+    }, '');
   }
 
   randomCell (): ICell {
