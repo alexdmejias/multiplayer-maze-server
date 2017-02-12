@@ -3,6 +3,7 @@ require('source-map-support').install();
 import * as express from 'express';
 import * as http from 'http';
 import * as chalk from 'chalk';
+import * as fsm from 'javascript-state-machine';
 
 import config from './config';
 import Utils from './utils';
@@ -19,156 +20,110 @@ const utils = new Utils(playersArr, playersObj, config);
 import Grid from './mazes/grid';
 import algos from './mazes/algos';
 
-const gridSize = 10;
-
-const maze = new Grid(gridSize, gridSize, algos['Binary']);
-
-const mazeConnections = maze.allCellConnectionsAsStr();
-const mazeConnectionsSplitIndex: number = -1 * (gridSize + 1);
-
-const mazeConnectionsPublic = mazeConnections.slice(0, mazeConnectionsSplitIndex);
-const mazeConnectionsSecret = mazeConnections.slice(mazeConnectionsSplitIndex);
-
-const possibleGameStates = [
-  'intermission',
-  'starting',
-  'started',
-  'finishing',
-  'finished',
-];
-
-function intermissionCallback (specificPlayerId?: string) {
-  console.log('you are in the intermission state')
+const pppp = {
+  algo: 'Binary',
+  size: 10
 }
 
-function startingCallback (specificPlayerId?: string) {
-  console.log('you are in the starting state')
+function generateMaze (props) {
+  console.log(chalk.bgMagenta.black('maze: generating'));
+  const maze = new Grid(props.size, props.size, algos[props.algo]);
+  const mazeConnections = maze.allCellConnectionsAsStr();
+  const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
+  const splitIndex: number = -1 * (props.gridSize + 1);
+
+  return {
+    connectionsPublic: mazeConnections.slice(0, mazeConnectionsSplitIndex),
+    connectionsSecret: mazeConnections.slice(mazeConnectionsSplitIndex)
+  };
 }
 
-function startedCallback (specificPlayerId?: string) {
-  console.log('you are in the started state')
+let currentMaze;
+
+const STATES = {
+  INTERMISSION: 'intermission',
+  STARTING: 'starting',
+  STARTED: 'started',
+  FINISHING: 'finishing',
+  FINISHED: 'finished'
 }
 
-function finishingCallback (specificPlayerId?: string) {
-  console.log('you are in the finishing state')
+const DURATIONS = {
+  INTERMISSION: 5000,
+  STARTING: 5000,
+  STARTED: 5000,
+  FINISHING: 5000,
+  FINISHED: 5000
 }
 
-function finishedCallback (specificPlayerId?: string) {
-  console.log('you are in the finished state')
-}
-// -------------------------- //
-const possibleGameStatesOptions = {
-  'intermission': {
-    duration: 2000,
-    callback: (specificPlayerId?: string) => {
-      intermissionCallback(specificPlayerId);
-    }
-  },
-  'starting': {
-    duration: 2000,
-    callback: (specificPlayerId?: string) => {
-      startingCallback(specificPlayerId);
-    }
-  },
-  'started': {
-    duration: 2000,
-    callback: (specificPlayerId?: string) => {
-      startedCallback(specificPlayerId);
-    }
-  },
-  'finishing': {
-    duration: 2000,
-    callback: (specificPlayerId?: string) => {
-      finishingCallback(specificPlayerId);
-    }
-  },
-  'finished': {
-    duration: 2000,
-    callback: (specificPlayerId?: string) => {
-      finishedCallback(specificPlayerId);
+const STATE = fsm.create({
+  initial: STATES.FINISHED,
+  events: [
+    {name: 'stopWait', from: STATES.INTERMISSION, to: STATES.STARTING},
+    {name: 'startPlay', from: STATES.STARTING, to: STATES.STARTED},
+    {name: 'play', from: STATES.STARTED, to: STATES.FINISHING},
+    {name: 'stopPlay', from: STATES.FINISHING, to: STATES.FINISHED},
+    {name: 'startWait', from: STATES.FINISHED, to: STATES.INTERMISSION},
+  ],
+  callbacks: {
+    'onstopWait': () => {
+      console.log(chalk.bgMagenta.black('maze: transmitting secret'));
+      // io.emit(`state${STATE.current}`);
+      io.emit('mazeArrival', {secret: true, maze: currentMaze.connectionsSecret});
+    },
+    'onstartPlay': () => {
+      // io.emit(`state${STATE.current}`);
+    },
+    'onplay': () => {
+      // io.emit(`state${STATE.current}`);
+    },
+    'onstopPlay': () => {
+      // io.emit(`state${STATE.current}`);
+      io.emit('mazeFinished');
+    },
+    'onstartWait': () => {
+      currentMaze = generateMaze(pppp);
+      console.log(chalk.bgMagenta.black('maze: transmitting public'));
+      io.emit(`state${STATE.current}`);
+      io.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
+    },
+    onenterstate: (event, from, to) => {
+      console.log(chalk.bgYellow.black('state:', event, from, to))
+      io.emit(`state${this.current}`);
     }
   }
-}
+});
 
-let internalState: string = possibleGameStates[0];
 let internalClock;
 
-function executeGameStateChange (currentState: string) {
+function initGameLoop () {
+  STATE[STATE.transitions()[0]]();
 
-  const nextState: string = getNextGameStateName(getGameStateIndex(currentState));
-  const currentStateOptions = possibleGameStatesOptions[currentState];
-
-  console.log(currentState, '<<<<<<')
-
-  if (currentStateOptions.callback) {
-    currentStateOptions.callback();
-  }
+  // console.log('state:', STATE.current);
 
   internalClock = setTimeout(() => {
-    setGameState(nextState);
-    executeGameStateChange(nextState);
+    initGameLoop();
   }, 5000);
 }
 
-function setGameState (newGameState: string) {
-  internalState = newGameState;
-}
-
-function getGameStateIndex (state: string): number {
-  return possibleGameStates.indexOf(state);
-}
-
-function getCurrGameStateIndex (): number {
-  return possibleGameStates.indexOf(possibleGameStates[internalState]);
-}
-
-function getCurrGameStateName (): string {
-  return internalState;
-}
-
-function getNextGameState (currentState: number): number {
-  const amountOfGameStates: number = possibleGameStates.length;
-
-  if (currentState === (amountOfGameStates - 1)) {
-    return 0;
-  } else {
-    return currentState + 1;
-  }
-}
-
-function getNextGameStateName (currentState: number): string {
-  const nextStateIndex = getNextGameState(currentState);
-
-  return possibleGameStates[nextStateIndex];
-}
-
 function init () {
-  executeGameStateChange(internalState)
+  console.log('initiating game loop');
+  initGameLoop();
 }
 
 function newConnectionInit (socket) {
   utils._addPlayer(socket.id);
-  const currentState = getCurrGameStateName();
-  const currentStateOptions = possibleGameStatesOptions[currentState];
 
-  if (currentStateOptions.callback) {
-    currentStateOptions.callback(socket.id);
+  switch (STATE.current) {
+    case STATES.INTERMISSION:
+      socket.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
+      break;
+
+    default:
+      break;
   }
-  // socket.emit('mazeArrival', {maze: mazeConnectionsPublic});
-  // console.log(maze.print())
-  // console.log(mazeConnections);
-
-  // setTimeout(() => {
-  //   socket.emit('mazeArrival', {secret: true, maze: mazeConnectionsSecret});
-  // }, 2000);
 
 }
-
-
-
-
-
-
 
 server.listen(config.port, function() {
   console.log(chalk.bgRed.black(`listing on port: ${config.port}`));
@@ -197,18 +152,4 @@ io.on('connection', function (socket) {
     });
   });
 
-  // socket.on('gameIntermission', () => { });
-  // socket.on('gameStarting', () => { });
-  // socket.on('gameStarted', () => { });
-  // socket.on('gameFinishing', () => {});
-  // socket.on('gameFinished', () => {});
-  // socket.on('gameUpdating', () => {});
 });
-
-// function _getNextState(currentState: possibleGameStates): number {
-//   if (currentState === possibleGameStates.finished) {
-//     return possibleGameStates.intermission;
-//   } else {
-//     return currentState + 1;
-//   }
-// }
