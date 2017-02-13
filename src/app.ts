@@ -89,7 +89,7 @@ const STATE = fsm.create({
     },
     onenterstate: (event, from, to) => {
       console.log(chalk.bgYellow.black('state:', event, from, to))
-      io.emit(`state${this.current}`);
+      io.emit(`state${to}`);
     }
   }
 });
