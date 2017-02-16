@@ -18,7 +18,7 @@
         "DEBUG": "*-module"
       },
       "console": "internalConsole",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "openOnFirstSessionStart",
       "preLaunchTask": "build",
       "sourceMaps": true,
       "outFiles": [
@@ -42,10 +42,12 @@
         "NODE_ENV": "development",
         "DEBUG": "*-module"
       },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "openOnFirstSessionStart",
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
       "sourceMaps": true,
-      "outDir": "${workspaceRoot}/dist"
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ]
     },
     {
       "name": "Server - External",
