@@ -17,8 +17,7 @@ const playersArr: string[] = [];
 const playersObj: IPlayersObj = {};
 const utils = new Utils(playersArr, playersObj, config);
 
-import Grid from './mazes/grid';
-import algos from './mazes/algos';
+import Grid, {Algos as algos} from 'multiplayer-maze-core';
 
 const pppp = {
   algo: 'Binary',
@@ -27,7 +26,7 @@ const pppp = {
 
 function generateMaze (props) {
   console.log(chalk.bgMagenta.black('maze: generating'));
-  const maze = new Grid(props.size, props.size, algos[props.algo]);
+  const maze = new Grid(props.size, props.size, props.algo);
   const mazeConnections = maze.allCellConnectionsAsStr();
   const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
   const splitIndex: number = -1 * (props.gridSize + 1);
