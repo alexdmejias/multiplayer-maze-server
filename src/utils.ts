@@ -25,6 +25,10 @@ class Utils {
     return this.playersObj[playerId] || {};
   }
 
+  _getAllPlayers () {
+    return this.playersObj || {};
+  }
+
   _playerScored (playerId: string): IPlayer | number{
     const player = this._findPlayer(playerId);
     if (player) {
@@ -90,7 +94,7 @@ class Utils {
       return false;
     }
   }
-  
+
 }
 
 export default Utils;

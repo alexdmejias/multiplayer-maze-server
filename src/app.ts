@@ -24,6 +24,8 @@ const pppp = {
   size: 10
 }
 
+let internalClock;
+
 function generateMaze (props) {
   console.log(chalk.bgMagenta.black('maze: generating'));
   const maze = new Grid(props.size, props.size, props.algo);
@@ -39,20 +41,20 @@ function generateMaze (props) {
 
 let currentMaze;
 
-const STATES = {
-  INTERMISSION: 'intermission',
-  STARTING: 'starting',
-  STARTED: 'started',
-  FINISHING: 'finishing',
-  FINISHED: 'finished'
+enum STATES {
+  INTERMISSION = 'intermission',
+  STARTING = 'starting',
+  STARTED = 'started',
+  FINISHING = 'finishing',
+  FINISHED = 'finished'
 }
 
 const DURATIONS = {
-  INTERMISSION: 5000,
-  STARTING: 5000,
-  STARTED: 5000,
-  FINISHING: 5000,
-  FINISHED: 5000
+  INTERMISSION: 500000,
+  STARTING: 500000,
+  STARTED: 500000,
+  FINISHING: 500000,
+  FINISHED: 500000
 }
 
 const STATE = fsm.create({
@@ -87,22 +89,18 @@ const STATE = fsm.create({
       io.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
     },
     onenterstate: (event, from, to) => {
-      console.log(chalk.bgYellow.black('state:', event, from, to))
+      console.log(chalk.bgYellow.black(`event: ${event}, from: ${from}, to: ${to}`))
       io.emit(`state${to}`);
     }
   }
 });
 
-let internalClock;
-
 function initGameLoop () {
   STATE[STATE.transitions()[0]]();
 
-  // console.log('state:', STATE.current);
-
   internalClock = setTimeout(() => {
     initGameLoop();
-  }, 5000);
+  }, 50000);
 }
 
 function init () {
@@ -112,6 +110,10 @@ function init () {
 
 function newConnectionInit (socket) {
   utils._addPlayer(socket.id);
+    socket.emit('initConnection', {
+        players: utils._getAllPlayers(),
+        currentState: STATE.current
+    });
 
   switch (STATE.current) {
     case STATES.INTERMISSION:
