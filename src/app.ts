@@ -3,7 +3,7 @@ require('source-map-support').install();
 import * as express from 'express';
 import * as http from 'http';
 import * as chalk from 'chalk';
-import * as fsm from 'javascript-state-machine';
+import * as StateMachine from 'javascript-state-machine';
 
 import config from './config';
 import Utils from './utils';
@@ -49,6 +49,12 @@ enum STATES {
   FINISHED = 'finished'
 }
 
+enum EVENTS {
+    SOCKETINITCONNECTION = 'socket-initConnection',
+
+    MAZEARRIVAL = 'maze-arrival'
+}
+
 const DURATIONS = {
   INTERMISSION: 500000,
   STARTING: 500000,
@@ -57,46 +63,46 @@ const DURATIONS = {
   FINISHED: 500000
 }
 
-const STATE = fsm.create({
-  initial: STATES.FINISHED,
-  events: [
+const STATEMACHINE = new StateMachine({
+  init: STATES.FINISHED,
+  transitions: [
     {name: 'stopWait', from: STATES.INTERMISSION, to: STATES.STARTING},
     {name: 'startPlay', from: STATES.STARTING, to: STATES.STARTED},
     {name: 'play', from: STATES.STARTED, to: STATES.FINISHING},
     {name: 'stopPlay', from: STATES.FINISHING, to: STATES.FINISHED},
     {name: 'startWait', from: STATES.FINISHED, to: STATES.INTERMISSION},
   ],
-  callbacks: {
-    'onstopWait': () => {
+  methods: {
+    'onStopWait': () => {
       console.log(chalk.bgMagenta.black('maze: transmitting secret'));
-      // io.emit(`state${STATE.current}`);
+      // io.emit(`state${STATEMACHINE.current}`);
       io.emit('mazeArrival', {secret: true, maze: currentMaze.connectionsSecret});
     },
-    'onstartPlay': () => {
-      // io.emit(`state${STATE.current}`);
+    'onStartPlay': () => {
+      // io.emit(`state${STATEMACHINE.current}`);
     },
-    'onplay': () => {
-      // io.emit(`state${STATE.current}`);
+    'onPlay': () => {
+      // io.emit(`state${STATEMACHINE.current}`);
     },
-    'onstopPlay': () => {
-      // io.emit(`state${STATE.current}`);
+    'onStopPlay': () => {
+      // io.emit(`state${STATEMACHINE.current}`);
       io.emit('mazeFinished');
     },
-    'onstartWait': () => {
+    'onStartWait': () => {
       currentMaze = generateMaze(pppp);
       console.log(chalk.bgMagenta.black('maze: transmitting public'));
-      io.emit(`state${STATE.current}`);
+      io.emit(`state${STATEMACHINE.current}`);
       io.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
     },
-    onenterstate: (event, from, to) => {
-      console.log(chalk.bgYellow.black(`event: ${event}, from: ${from}, to: ${to}`))
-      io.emit(`state${to}`);
+    'onEnterState': (lifecycle) => {
+      console.log(chalk.bgYellow.black(`event: ${lifecycle.event}, from: ${lifecycle.from}, to: ${lifecycle.to}`))
+      io.emit(`state${lifecycle.to}`);
     }
   }
 });
 
 function initGameLoop () {
-  STATE[STATE.transitions()[0]]();
+  STATEMACHINE[STATEMACHINE.transitions()[0]]();
 
   internalClock = setTimeout(() => {
     initGameLoop();
@@ -110,12 +116,12 @@ function init () {
 
 function newConnectionInit (socket) {
   utils._addPlayer(socket.id);
-    socket.emit('initConnection', {
+    socket.emit('socket-initConnection', {
         players: utils._getAllPlayers(),
-        currentState: STATE.current
+        currentState: STATEMACHINE.current
     });
 
-  switch (STATE.current) {
+  switch (STATEMACHINE.current) {
     case STATES.INTERMISSION:
       socket.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
       break;
