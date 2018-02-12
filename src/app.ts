@@ -1,5 +1,3 @@
-require('source-map-support').install();
-
 import * as express from 'express';
 import * as http from 'http';
 import * as chalk from 'chalk';
@@ -8,6 +6,9 @@ import * as StateMachine from 'javascript-state-machine';
 import config from './config';
 import Utils from './utils';
 import {IPlayersObj, IConfig} from './_interfaces';
+import Grid from 'multiplayer-maze-core';
+
+require('source-map-support').install();
 
 const app = express();
 const server = http.createServer(app);
@@ -17,12 +18,10 @@ const playersArr: string[] = [];
 const playersObj: IPlayersObj = {};
 const utils = new Utils(playersArr, playersObj, config);
 
-import Grid, {Algos as algos} from 'multiplayer-maze-core';
-
 const pppp = {
   algo: 'Binary',
   size: 10
-}
+};
 
 let internalClock;
 
@@ -31,7 +30,6 @@ function generateMaze (props) {
   const maze = new Grid(props.size, props.size, props.algo);
   const mazeConnections = maze.allCellConnectionsAsStr();
   const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
-  const splitIndex: number = -1 * (props.gridSize + 1);
 
   return {
     connectionsPublic: mazeConnections.slice(0, mazeConnectionsSplitIndex),
@@ -50,17 +48,8 @@ enum STATES {
 }
 
 enum EVENTS {
-    SOCKETINITCONNECTION = 'socket-initConnection',
-
-    MAZEARRIVAL = 'maze-arrival'
-}
-
-const DURATIONS = {
-  INTERMISSION: 500000,
-  STARTING: 500000,
-  STARTED: 500000,
-  FINISHING: 500000,
-  FINISHED: 500000
+  SOCKETINITCONNECTION = 'socket-initConnection',
+  MAZEARRIVAL = 'maze-arrival'
 }
 
 const STATEMACHINE = new StateMachine({
@@ -75,28 +64,22 @@ const STATEMACHINE = new StateMachine({
   methods: {
     'onStopWait': () => {
       console.log(chalk.bgMagenta.black('maze: transmitting secret'));
-      // io.emit(`state${STATEMACHINE.current}`);
-      io.emit('mazeArrival', {secret: true, maze: currentMaze.connectionsSecret});
-    },
-    'onStartPlay': () => {
-      // io.emit(`state${STATEMACHINE.current}`);
-    },
-    'onPlay': () => {
-      // io.emit(`state${STATEMACHINE.current}`);
+      // io.emit(`fsm-${STATEMACHINE.current}`);
+      io.emit('maze-arrival', {secret: true, maze: currentMaze.connectionsSecret});
     },
     'onStopPlay': () => {
-      // io.emit(`state${STATEMACHINE.current}`);
+      // io.emit(`fsm-{STATEMACHINE.current}`);
       io.emit('mazeFinished');
     },
     'onStartWait': () => {
       currentMaze = generateMaze(pppp);
       console.log(chalk.bgMagenta.black('maze: transmitting public'));
-      io.emit(`state${STATEMACHINE.current}`);
-      io.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
+      io.emit(`fsm-${STATEMACHINE.current}`);
+      io.emit('maze-arrival', {maze: currentMaze.connectionsPublic});
     },
     'onEnterState': (lifecycle) => {
-      console.log(chalk.bgYellow.black(`event: ${lifecycle.event}, from: ${lifecycle.from}, to: ${lifecycle.to}`))
-      io.emit(`state${lifecycle.to}`);
+      console.log(chalk.bgYellow.black(`FSM: transitioning states...  from: ${lifecycle.from}, to: ${lifecycle.to}`))
+      io.emit(`fsm-${lifecycle.to}`);
     }
   }
 });
@@ -106,7 +89,7 @@ function initGameLoop () {
 
   internalClock = setTimeout(() => {
     initGameLoop();
-  }, 50000);
+  }, 5000);
 }
 
 function init () {
@@ -116,14 +99,14 @@ function init () {
 
 function newConnectionInit (socket) {
   utils._addPlayer(socket.id);
-    socket.emit('socket-initConnection', {
-        players: utils._getAllPlayers(),
-        currentState: STATEMACHINE.current
-    });
+  socket.emit('socket-initConnection', {
+    players: utils._getAllPlayers(),
+    currentState: STATEMACHINE.state
+  });
 
   switch (STATEMACHINE.current) {
     case STATES.INTERMISSION:
-      socket.emit('mazeArrival', {maze: currentMaze.connectionsPublic});
+      socket.emit('maze-arrival', {maze: currentMaze.connectionsPublic});
       break;
 
     default:
@@ -132,7 +115,7 @@ function newConnectionInit (socket) {
 
 }
 
-server.listen(config.port, function() {
+server.listen(config.port, function () {
   console.log(chalk.bgRed.black(`listing on port: ${config.port}`));
   init();
 });
@@ -144,12 +127,13 @@ io.on('connection', function (socket) {
     utils._removePlayer(socket.id);
   });
 
-  socket.on('playerScored', (data) => {
+  socket.on('player:scored', (data) => {
     utils._ddp('scored', socket.id);
-    utils._playerScored(socket.id);
+    const player = utils._playerScored(socket.id);
+    socket.emit('player:update', player);
   });
 
-  socket.on('playerChangedName', (data) => {
+  socket.on('player:changedName', (data) => {
     utils._changePlayerAttr(socket.id, 'username', data.newName);
   });
 
@@ -158,5 +142,4 @@ io.on('connection', function (socket) {
       console.log(`${player} - ${playersObj[player].currentScore}`);
     });
   });
-
 });

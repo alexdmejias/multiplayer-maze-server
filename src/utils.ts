@@ -3,12 +3,11 @@ import * as chalk from 'chalk';
 import {IPlayersObj, IPlayer, IConfig} from './_interfaces';
 
 class Utils {
-
   playersObj: IPlayersObj = {};
   playersArr: string[];
   config: IConfig;
 
-  constructor(playersArrArg: string[], playersObjArg: IPlayersObj, configArg: IConfig) {
+  constructor (playersArrArg: string[], playersObjArg: IPlayersObj, configArg: IConfig) {
     this.config = configArg;
     this.playersArr = playersArrArg;
     this.playersObj = playersObjArg;
@@ -29,12 +28,11 @@ class Utils {
     return this.playersObj || {};
   }
 
-  _playerScored (playerId: string): IPlayer | number{
+  _playerScored (playerId: string): IPlayer | number {
     const player = this._findPlayer(playerId);
     if (player) {
       this.playersObj[playerId].currentScore += this.config.scoreIncrementer;
-
-      return this.playersObj[playerId].currentScore;
+      return this.playersObj[playerId];
     } else {
       return -1;
     }
@@ -54,7 +52,7 @@ class Utils {
   _removePlayer (playerId: string): boolean {
     const playerIdIndex: number = this.playersArr.indexOf(playerId);
 
-    if ( playerIdIndex > -1) {
+    if (playerIdIndex > -1) {
       this.playersArr.splice(playerIdIndex, 1);
 
       if (this.playersObj[playerId]) {
@@ -70,7 +68,6 @@ class Utils {
       console.log(chalk.bgYellow.black(`failed to remove player 2`));
       return false;
     }
-
   }
 
   _addPlayer (playerId: string) {
@@ -88,13 +85,11 @@ class Utils {
         console.log(chalk.bgYellow.black(`failed to add player`));
         return false;
       }
-
     } else {
       console.log(chalk.bgYellow.black(`failed to add player`));
       return false;
     }
   }
-
 }
 
 export default Utils;
