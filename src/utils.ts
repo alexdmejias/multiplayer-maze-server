@@ -24,7 +24,7 @@ class Utils {
     return this.playersObj[playerId] || {};
   }
 
-  _getAllPlayers () {
+  _getAllPlayers (): Object {
     return this.playersObj || {};
   }
 

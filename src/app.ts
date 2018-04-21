@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as chalk from 'chalk';
 import * as StateMachine from 'javascript-state-machine';
+import { table } from 'table';
 
 import config from './config';
 import Utils from './utils';
@@ -70,6 +71,7 @@ const STATEMACHINE = new StateMachine({
     'onStopPlay': () => {
       // io.emit(`fsm-{STATEMACHINE.current}`);
       io.emit('mazeFinished');
+      printLeaderBoard();
     },
     'onStartWait': () => {
       currentMaze = generateMaze(pppp);
@@ -83,6 +85,23 @@ const STATEMACHINE = new StateMachine({
     }
   }
 });
+
+function printLeaderBoard() {
+  // debugger;
+  const players = utils._getAllPlayers();
+  // Object.keys(players).forEach((player) => {
+  //   console.log(`${player} - ${players[player].currentScore}`)
+  // })
+  const data = [['player id', 'usrname', 'score']];
+  // const tableData = [1,23,2,4,5]
+  Object.keys(players).forEach((curr) => {
+    data.push([curr, players[curr].username || 'N/A', players[curr].currentScore])
+  })
+
+
+  // const data =
+  console.log(table(data));
+}
 
 function initGameLoop () {
   STATEMACHINE[STATEMACHINE.transitions()[0]]();
@@ -130,6 +149,7 @@ io.on('connection', function (socket) {
   socket.on('player:scored', (data) => {
     utils._ddp('scored', socket.id);
     const player = utils._playerScored(socket.id);
+    printLeaderBoard()
     socket.emit('player:update', player);
   });
 
