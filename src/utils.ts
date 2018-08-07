@@ -28,10 +28,10 @@ class Utils {
     return this.playersObj || {};
   }
 
-  _playerScored (playerId: string): IPlayer | number {
+  _playerScored (playerId: string, score: number): IPlayer | number {
     const player = this._findPlayer(playerId);
     if (player) {
-      this.playersObj[playerId].currentScore += this.config.scoreIncrementer;
+      this.playersObj[playerId].currentScore += score;
       return this.playersObj[playerId];
     } else {
       return -1;
@@ -76,7 +76,8 @@ class Utils {
 
       if (!this.playersObj[playerId]) {
         this.playersObj[playerId] = {
-          currentScore: 0
+          currentScore: 0,
+          id: playerId
         };
 
         this._ddp('connected', playerId);

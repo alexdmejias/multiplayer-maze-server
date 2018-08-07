@@ -24,6 +24,8 @@ const pppp = {
   size: 10
 };
 
+let roundStart = 0;
+
 let internalClock;
 
 function generateMaze (props) {
@@ -66,6 +68,7 @@ const STATEMACHINE = new StateMachine({
     'onStopWait': () => {
       console.log(chalk.bgMagenta.black('maze: transmitting secret'));
       // io.emit(`fsm-${STATEMACHINE.current}`);
+      roundStart = Date.now();
       io.emit('maze-arrival', {secret: true, maze: currentMaze.connectionsSecret});
     },
     'onStopPlay': () => {
@@ -148,9 +151,13 @@ io.on('connection', function (socket) {
 
   socket.on('player:scored', (data) => {
     utils._ddp('scored', socket.id);
-    const player = utils._playerScored(socket.id);
+    const now = Date.now();
+    const score = Math.floor((now - roundStart) / 1000);
+    debugger;
+    const player = utils._playerScored(socket.id, score);
     printLeaderBoard()
-    socket.emit('player:update', player);
+    console.log('alexalex - ----------', player);
+    socket.emit('player-update', player);
   });
 
   socket.on('player:changedName', (data) => {

@@ -1,5 +1,6 @@
 export interface IPlayer {
   currentScore: number;
+  id: string;
   username?: string;
 };
 
