@@ -24,117 +24,78 @@ const pppp = {
   size: 10
 };
 
-let roundStart = 0;
-
-let internalClock;
+let roundStartTime = 0;
+let currentMaze;
 
 function generateMaze (props) {
   console.log(chalk.bgMagenta.black('maze: generating'));
   const maze = new Grid(props.size, props.size, props.algo);
   const mazeConnections = maze.allCellConnectionsAsStr();
-  const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
+  // const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
 
-  return {
-    connectionsPublic: mazeConnections.slice(0, mazeConnectionsSplitIndex),
-    connectionsSecret: mazeConnections.slice(mazeConnectionsSplitIndex)
-  };
+  return mazeConnections;
 }
 
-let currentMaze;
-
-enum STATES {
-  INTERMISSION = 'intermission',
-  STARTING = 'starting',
-  STARTED = 'started',
-  FINISHING = 'finishing',
-  FINISHED = 'finished'
-}
-
-enum EVENTS {
-  SOCKETINITCONNECTION = 'socket-initConnection',
-  MAZEARRIVAL = 'maze-arrival'
-}
+const STATES = {
+  WAITING: {
+    name: 'waiting',
+    duration: 5000
+  },
+  PLAYING: {
+    name: 'playing',
+    duration: 10000
+  }
+};
 
 const STATEMACHINE = new StateMachine({
-  init: STATES.FINISHED,
+  init: STATES.WAITING.name,
   transitions: [
-    {name: 'stopWait', from: STATES.INTERMISSION, to: STATES.STARTING},
-    {name: 'startPlay', from: STATES.STARTING, to: STATES.STARTED},
-    {name: 'play', from: STATES.STARTED, to: STATES.FINISHING},
-    {name: 'stopPlay', from: STATES.FINISHING, to: STATES.FINISHED},
-    {name: 'startWait', from: STATES.FINISHED, to: STATES.INTERMISSION},
+    {name: 'wait', from: STATES.PLAYING.name, to: STATES.WAITING.name},
+    {name: 'play', from: STATES.WAITING.name, to: STATES.PLAYING.name}
   ],
   methods: {
-    'onStopWait': () => {
-      console.log(chalk.bgMagenta.black('maze: transmitting secret'));
-      // io.emit(`fsm-${STATEMACHINE.current}`);
-      roundStart = Date.now();
-      io.emit('maze-arrival', {secret: true, maze: currentMaze.connectionsSecret});
-    },
-    'onStopPlay': () => {
-      // io.emit(`fsm-{STATEMACHINE.current}`);
-      io.emit('mazeFinished');
-      printLeaderBoard();
-    },
-    'onStartWait': () => {
+    'onWait': () => {
       currentMaze = generateMaze(pppp);
-      console.log(chalk.bgMagenta.black('maze: transmitting public'));
-      io.emit(`fsm-${STATEMACHINE.current}`);
-      io.emit('maze-arrival', {maze: currentMaze.connectionsPublic});
+      setTimeout(() => {
+        STATEMACHINE.play();
+      }, STATES.WAITING.duration);
     },
+    'onPlay': () => {
+      currentMaze = generateMaze(pppp);
+      roundStartTime = Date.now();
+      io.emit('maze-arrival', {maze: currentMaze});
+      setTimeout(() => {
+        STATEMACHINE.wait();
+      }, STATES.PLAYING.duration);
+    },
+    // APPLIES TO ALL STATES
     'onEnterState': (lifecycle) => {
-      console.log(chalk.bgYellow.black(`FSM: transitioning states...  from: ${lifecycle.from}, to: ${lifecycle.to}`))
+      console.log(chalk.bgYellow.black(`FSM: transitioning states...  from: ${lifecycle.from}, to: ${lifecycle.to}, ${Object.keys(lifecycle)}`));
       io.emit(`fsm-${lifecycle.to}`);
     }
   }
 });
 
-function printLeaderBoard() {
-  // debugger;
+function printLeaderBoard () {
   const players = utils._getAllPlayers();
-  // Object.keys(players).forEach((player) => {
-  //   console.log(`${player} - ${players[player].currentScore}`)
-  // })
   const data = [['player id', 'usrname', 'score']];
-  // const tableData = [1,23,2,4,5]
+
   Object.keys(players).forEach((curr) => {
-    data.push([curr, players[curr].username || 'N/A', players[curr].currentScore])
-  })
+    data.push([curr, players[curr].username || 'N/A', players[curr].currentScore]);
+  });
 
-
-  // const data =
   console.log(table(data));
 }
 
 function initGameLoop () {
-  STATEMACHINE[STATEMACHINE.transitions()[0]]();
-
-  internalClock = setTimeout(() => {
-    initGameLoop();
-  }, 5000);
+  console.log(STATEMACHINE.transitions());
+  currentMaze = generateMaze(pppp);
+  STATEMACHINE.play();
 }
 
 function init () {
   console.log('initiating game loop');
   initGameLoop();
-}
-
-function newConnectionInit (socket) {
-  utils._addPlayer(socket.id);
-  socket.emit('socket-initConnection', {
-    players: utils._getAllPlayers(),
-    currentState: STATEMACHINE.state
-  });
-
-  switch (STATEMACHINE.current) {
-    case STATES.INTERMISSION:
-      socket.emit('maze-arrival', {maze: currentMaze.connectionsPublic});
-      break;
-
-    default:
-      break;
-  }
-
 }
 
 server.listen(config.port, function () {
@@ -143,7 +104,13 @@ server.listen(config.port, function () {
 });
 
 io.on('connection', function (socket) {
-  newConnectionInit(socket);
+  utils._addPlayer(socket.id);
+  
+  socket.emit('socket-initConnection', {
+    players: utils._getAllPlayers(),
+    currentState: STATEMACHINE.state,
+    maze: currentMaze
+  });
 
   socket.on('disconnect', () => {
     utils._removePlayer(socket.id);
@@ -152,12 +119,10 @@ io.on('connection', function (socket) {
   socket.on('player:scored', (data) => {
     utils._ddp('scored', socket.id);
     const now = Date.now();
-    const score = Math.floor((now - roundStart) / 1000);
-    debugger;
+    const score = Math.floor((5000 - (roundStartTime - now)) / 1000);
     const player = utils._playerScored(socket.id, score);
-    printLeaderBoard()
-    console.log('alexalex - ----------', player);
     socket.emit('player-update', player);
+    printLeaderBoard();
   });
 
   socket.on('player:changedName', (data) => {
