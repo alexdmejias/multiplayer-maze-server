@@ -58,6 +58,7 @@ const STATEMACHINE = new StateMachine({
   methods: {
     'onWait': () => {
       currentMaze = generateMaze(pppp);
+      io.emit('players-update', utils._getAllPlayers());
       setTimeout(() => {
         STATEMACHINE.play();
       }, STATES.WAITING.duration);
@@ -124,8 +125,7 @@ io.on('connection', function (socket) {
     utils._ddp('scored', socket.id);
     const now = Date.now();
     const score = Math.floor((5000 - (roundStartTime - now)) / 1000);
-    const player = utils._playerScored(socket.id, score);
-    socket.emit('player-update', player);
+    utils._playerScored(socket.id, score);
     printLeaderBoard();
   });
 
