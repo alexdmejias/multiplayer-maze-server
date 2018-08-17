@@ -70,14 +70,15 @@ class Utils {
     }
   }
 
-  _addPlayer (playerId: string) {
+  _addPlayer (playerId: string, username: string) {
     if (this.playersArr.indexOf(playerId) < 0) {
       this.playersArr.push(playerId);
 
       if (!this.playersObj[playerId]) {
         this.playersObj[playerId] = {
           currentScore: 0,
-          id: playerId
+          id: playerId,
+          username
         };
 
         this._ddp('connected', playerId);

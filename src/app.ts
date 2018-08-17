@@ -9,6 +9,8 @@ import Utils from './utils';
 import {IPlayersObj, IConfig} from './_interfaces';
 import Grid from 'multiplayer-maze-core';
 
+import * as sillyname from 'sillyname';
+
 require('source-map-support').install();
 
 const app = express();
@@ -104,12 +106,14 @@ server.listen(config.port, function () {
 });
 
 io.on('connection', function (socket) {
-  utils._addPlayer(socket.id);
-  
+  const playerUsername = sillyname();
+  utils._addPlayer(socket.id, playerUsername);
+
   socket.emit('socket-initConnection', {
     players: utils._getAllPlayers(),
     currentState: STATEMACHINE.state,
-    maze: currentMaze
+    maze: currentMaze,
+    username: playerUsername
   });
 
   socket.on('disconnect', () => {
