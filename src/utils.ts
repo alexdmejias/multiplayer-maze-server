@@ -1,96 +1,33 @@
 import * as chalk from 'chalk';
+import { table } from 'table';
 
-import {IPlayersObj, IPlayer, IConfig} from './_interfaces';
+import { IPlayers, IUtils } from './_interfaces';
 
-class Utils {
-  playersObj: IPlayersObj = {};
-  playersArr: string[];
-  config: IConfig;
-
-  constructor (playersArrArg: string[], playersObjArg: IPlayersObj, configArg: IConfig) {
-    this.config = configArg;
-    this.playersArr = playersArrArg;
-    this.playersObj = playersObjArg;
-  }
+class Utils implements IUtils {
+  constructor () {}
 
   /**
-  * Helper function to debug player messages
-  */
-  _ddp (message: string, playerId: string) {
+   * Helper function to debug player messages
+   */
+  ddp (message: string, playerId: string) {
     console.log(chalk.bgGreen(`player:${message} - ${playerId}`));
   }
 
-  _findPlayer (playerId: string) {
-    return this.playersObj[playerId] || {};
+  printLeaderBoard (players: IPlayers): void {
+    const data: (string | number)[][] = [['player id', 'usrname', 'score']];
+
+    Object.keys(players).forEach(curr => {
+      data.push([curr, players[curr].username, players[curr].currentScore]);
+    });
+
+    console.log(table(data));
   }
 
-  _getAllPlayers (): Object {
-    return this.playersObj || {};
-  }
+  calculateScore (roundStartTime: number): number {
+    const now = Date.now();
+    const score = Math.floor((5000 - (roundStartTime - now)) / 1000);
 
-  _playerScored (playerId: string, score: number): IPlayer | number {
-    const player = this._findPlayer(playerId);
-    if (player) {
-      this.playersObj[playerId].currentScore += score;
-      return this.playersObj[playerId];
-    } else {
-      return -1;
-    }
-  }
-
-  _changePlayerAttr (playerId: string, attribute: string, value: any): IPlayer | number {
-    const player = this._findPlayer(playerId);
-    if (player) {
-      this.playersObj[playerId][attribute] = value;
-
-      return this.playersObj[playerId];
-    } else {
-      return -1;
-    }
-  }
-
-  _removePlayer (playerId: string): boolean {
-    const playerIdIndex: number = this.playersArr.indexOf(playerId);
-
-    if (playerIdIndex > -1) {
-      this.playersArr.splice(playerIdIndex, 1);
-
-      if (this.playersObj[playerId]) {
-        delete this.playersObj[playerId];
-        this._ddp('disconnected', playerId);
-
-        return true;
-      } else {
-        console.log(chalk.bgYellow.black(`failed to remove player 1`));
-        return false;
-      }
-    } else {
-      console.log(chalk.bgYellow.black(`failed to remove player 2`));
-      return false;
-    }
-  }
-
-  _addPlayer (playerId: string, username: string) {
-    if (this.playersArr.indexOf(playerId) < 0) {
-      this.playersArr.push(playerId);
-
-      if (!this.playersObj[playerId]) {
-        this.playersObj[playerId] = {
-          currentScore: 0,
-          id: playerId,
-          username
-        };
-
-        this._ddp('connected', playerId);
-        return true;
-      } else {
-        console.log(chalk.bgYellow.black(`failed to add player`));
-        return false;
-      }
-    } else {
-      console.log(chalk.bgYellow.black(`failed to add player`));
-      return false;
-    }
+    return score;
   }
 }
 
