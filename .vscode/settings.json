@@ -4,13 +4,14 @@
     "**/.git": true,
     "**/.svn": true,
     "**/.DS_Store": true,
-    "**/*.js": { "when": "$(basename).ts"},
-    "**/*.js.map": {"when": "$(basename)"},
+    "**/*.js": { "when": "$(basename).ts" },
+    "**/*.js.map": { "when": "$(basename)" },
     "dist": false
   },
   "typescript.tsdk": "./node_modules/typescript/lib",
   "eslint.enable": false,
   "tslint.enable": true,
   "editor.formatOnSave": true,
-  "prettier.eslintIntegration": true
+  "prettier.eslintIntegration": true,
+  "editor.tabSize": 2
 }

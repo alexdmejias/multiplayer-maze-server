@@ -44,7 +44,7 @@ const STATES = {
   },
   PLAYING: {
     name: 'playing',
-    duration: 10000
+    duration: 90000000
   }
 };
 
@@ -57,6 +57,7 @@ const STATEMACHINE = new StateMachine({
   methods: {
     onWait: () => {
       currentMaze = generateMaze(pppp);
+
       io.emit('players-update', playersManager.getAllPlayers());
       setTimeout(() => {
         STATEMACHINE.play();
@@ -65,7 +66,6 @@ const STATEMACHINE = new StateMachine({
     onPlay: () => {
       currentMaze = generateMaze(pppp);
       roundStartTime = Date.now();
-      io.emit('maze-arrival', { maze: currentMaze });
       setTimeout(() => {
         STATEMACHINE.wait();
       }, STATES.PLAYING.duration);
@@ -79,20 +79,29 @@ const STATEMACHINE = new StateMachine({
           }, ${Object.keys(lifecycle)}`
         )
       );
-      io.emit(`fsm-${lifecycle.to}`);
+
+      io.emit(`fsm-state-change`, getStateChangePayload(lifecycle.to));
     }
   }
 });
 
-function initGameLoop () {
-  console.log(STATEMACHINE.transitions());
-  currentMaze = generateMaze(pppp);
-  STATEMACHINE.play();
+function getStateChangePayload (nextStage) {
+  const payload: { gameState: string; maze?: string } = {
+    // TODO: ewww
+    gameState: nextStage
+  };
+
+  if (nextStage === 'playing') {
+    payload.maze = currentMaze;
+  }
+
+  return payload;
 }
 
 function init () {
   console.log('initiating game loop');
-  initGameLoop();
+  currentMaze = generateMaze(pppp);
+  STATEMACHINE.play();
 }
 
 server.listen(config.port, () => {
@@ -101,14 +110,17 @@ server.listen(config.port, () => {
 });
 
 io.on('connection', socket => {
-  const playerUsername = sillyname();
-  playersManager.addPlayer(socket.id);
+  const newPlayer = playersManager.addPlayer(socket.id);
+  console.log(
+    chalk.bgRed.black(`new player joined: ${socket.id} AKA ${newPlayer}`)
+  );
 
   socket.emit('socket-initConnection', {
     players: playersManager.getAllPlayers(),
     currentState: STATEMACHINE.state,
     maze: currentMaze,
-    username: playerUsername
+    username: newPlayer,
+    id: socket.id
   });
 
   socket.on('disconnect', () => {
@@ -119,7 +131,9 @@ io.on('connection', socket => {
     utils.ddp('scored', socket.id);
     const score = utils.calculateScore(roundStartTime);
     playersManager.playerScored(socket.id, score);
-    utils.printLeaderBoard(playersManager.getAllPlayers());
+    const allPlayers = playersManager.getAllPlayers();
+    utils.printLeaderBoard(allPlayers);
+    io.emit('players-update', allPlayers);
   });
 
   socket.on('player:changedName', data => {

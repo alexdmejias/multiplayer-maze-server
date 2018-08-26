@@ -1,6 +1,6 @@
 import Cell from './cell';
 import Distance from './distance';
-import {IGrid, ICell} from '../_interfaces';
+import { IGrid, ICell } from '../_interfaces';
 
 class Grid implements IGrid {
   rows: number;
@@ -17,9 +17,9 @@ class Grid implements IGrid {
 
   createMatrix (): Cell[][] {
     const grid: Cell[][] = [];
-    for (var i = 0; i < this.rows; i++) {
+    for (let i = 0; i < this.rows; i++) {
       grid.push([]);
-      for (var h = 0; h < this.columns; h++) {
+      for (let h = 0; h < this.columns; h++) {
         grid[i].push(new Cell(i, h));
       }
     }
@@ -30,10 +30,10 @@ class Grid implements IGrid {
   configureCells (algorithm?: Function): number[][] {
     this.grid = this.createMatrix();
     let gridConnections = [];
-    this.grid.forEach((row) => {
+    this.grid.forEach(row => {
       const rowConnections = [];
-      row.forEach((cell) => {
-        const {row, column} = cell;
+      row.forEach(cell => {
+        const { row, column } = cell;
 
         cell.id = `${row}-${column}`;
 
@@ -43,8 +43,8 @@ class Grid implements IGrid {
         cell.setNeighbors('east', this.getCell(row, column + 1));
 
         cell.position = {
-          top: (cell.row * 10),
-          left: (cell.column * 10)
+          top: cell.row * 10,
+          left: cell.column * 10
         };
 
         rowConnections.push(0);
@@ -105,8 +105,8 @@ class Grid implements IGrid {
     while (frontier.length > 0) {
       const newFrontier = [];
 
-      frontier.forEach((currCell) => {
-        currCell.getLinksIds().forEach((currLink) => {
+      frontier.forEach(currCell => {
+        currCell.getLinksIds().forEach(currLink => {
           if (!distances.get(currLink)) {
             distances.set(currLink, currDistance);
             newFrontier.push(currCell.getLink(currLink));
@@ -121,26 +121,24 @@ class Grid implements IGrid {
   }
 
   print (): string {
-    let corner  = '+';
+    let corner = '+';
     let output = `${corner}${('---' + corner).repeat(this.columns)}\n`;
     this.grid.forEach((row: ICell[]) => {
       let top = '|';
       let bottom = corner;
       row.forEach((cell: ICell) => {
         let body = ` ${cell.neighborsId} `;
-        let eastBoundry = (cell.isLinked(cell.neighbors.east) ? '⇢' : '|');
+        let eastBoundry = cell.isLinked(cell.neighbors.east) ? '⇢' : '|';
         top += body + eastBoundry;
 
-        let southBoundry = (cell.isLinked(cell.neighbors.south) ? ' ⇡ ' : '---');
+        let southBoundry = cell.isLinked(cell.neighbors.south) ? ' ⇡ ' : '---';
         bottom += southBoundry + corner;
       });
       output += top + '\n';
       output += bottom + '\n';
-
     });
     return output;
   }
-
 }
 
 export default Grid;

@@ -17,9 +17,11 @@ class PLayersManager implements IPLayersManager {
     return this.players;
   }
 
-  addPlayer (newPlayerId): void {
+  addPlayer (newPlayerId): string {
     const playerUsername = sillyname();
     this.players[newPlayerId] = new Player(newPlayerId, playerUsername);
+
+    return playerUsername;
   }
 
   removePlayer (playerId: string): boolean {
