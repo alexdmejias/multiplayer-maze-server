@@ -62,8 +62,13 @@ class StateMachine implements IStateMachine {
 
       this.timer = setTimeout(() => {
         const next = this.transitions[transitionToCall].to;
-        const nextMethodized = this._makeMethodName(next);
-        this.methods[nextMethodized]();
+
+        if (this.methods['onEnterState']) {
+          logger.debug(`SM.calling onEnterState, ${transitionToCall} -> ${next}`);
+          this.methods['onEnterState'](transitionToCall, next);
+        }
+
+        this._callTransition(next);
       }, duration);
     } else {
       console.log('nope')
