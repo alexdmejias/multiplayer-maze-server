@@ -12,6 +12,7 @@ import Grid from './mazes/grid';
 import PlayersManager from './PlayersManager';
 import StateMachine, { ITransitions } from "./StateMachine";
 import logger from './logger';
+import { Socket } from "net";
 
 SourceMapSupport.install();
 
@@ -43,13 +44,13 @@ function generateMaze(props) {
 
 const transitions: ITransitions = {
   'playing': {
-    duration: 1000,
+    duration: 5000,
     to: 'waiting',
     from: 'playing',
     // name: 'playing'
   },
   'waiting': {
-    duration: 1000,
+    duration: 5000,
     to: 'playing',
     from: 'waiting'
   }
@@ -59,10 +60,17 @@ const STATEMACHINE = new StateMachine({
   initTransition: 'waiting',
   methods: {
     onWaiting: () => {
-      logger.debug('app.SM.this is the onWAiting callback');
+      currentMaze = generateMaze(gridConfig);
     },
     onPlaying: () => {
-      logger.debug('app.SM.onPlaying callback');
+      roundStartTime = Date.now();
+    },
+    onEnterState: (from, to) => {
+      io.emit('state-change', {
+        players: playersManager.getAllPlayers(),
+        currentState: STATEMACHINE.currentTransition,
+        maze: currentMaze,
+      })
     }
   },
   transitions
