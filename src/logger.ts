@@ -2,7 +2,11 @@ import winston, { format } from 'winston';
 
 const logger = winston.createLogger({
   level: 'debug',
-  format: format.combine(format.colorize(), format.simple()),
+  format: format.combine(
+    format.colorize(),
+    format.timestamp(),
+    format.simple()
+  ),
   transports: [
     new winston.transports.Console()
   ]
