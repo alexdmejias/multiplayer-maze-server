@@ -1,19 +1,19 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { table } from 'table';
 
 import { IPlayers, IUtils } from './_interfaces';
 
 class Utils implements IUtils {
-  constructor () {}
+  constructor() { }
 
   /**
    * Helper function to debug player messages
    */
-  ddp (message: string, playerId: string) {
+  ddp(message: string, playerId: string) {
     console.log(chalk.bgGreen(`player:${message} - ${playerId}`));
   }
 
-  printLeaderBoard (players: IPlayers): void {
+  printLeaderBoard(players: IPlayers): void {
     const data: (string | number)[][] = [['player id', 'usrname', 'score']];
 
     Object.keys(players).forEach(curr => {
@@ -23,7 +23,7 @@ class Utils implements IUtils {
     console.log(table(data));
   }
 
-  calculateScore (roundStartTime: number): number {
+  calculateScore(roundStartTime: number): number {
     const now = Date.now();
     const score = Math.floor((5000 - (roundStartTime - now)) / 1000);
 

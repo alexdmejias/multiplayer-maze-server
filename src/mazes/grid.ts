@@ -1,21 +1,32 @@
 import Cell from './cell';
 import Distance from './distance';
-import { IGrid, ICell } from '../_interfaces';
+import { IGrid, ICell, IGridConfig } from '../_interfaces';
+import Algos from './algos';
+import logger from '../logger';
 
 class Grid implements IGrid {
   rows: number;
   columns: number;
+  algo: Function;
   grid: ICell[][];
   allCellConnections: number[][];
 
-  constructor (rows: number, columns: number, algorithm?: Function) {
-    this.rows = rows;
-    this.columns = columns;
+  constructor(config: IGridConfig) {
+    this.rows = config.rows;
+    this.columns = config.columns;
+    this.algo = Algos[config.algo];
 
-    this.allCellConnections = this.configureCells(algorithm);
+    if (!this.algo && config.algo) {
+      logger.warn(`maze.${config.algo} is not a valid algo`);
+      logger.warn(`maze.valid algos are ${Object.keys(Algos)}`);
+    }
+
+    logger.debug('maze.creating grid with this config', config)
+
+    this.allCellConnections = this.configureCells(this.algo);
   }
 
-  createMatrix (): Cell[][] {
+  createMatrix(): Cell[][] {
     const grid: Cell[][] = [];
     for (let i = 0; i < this.rows; i++) {
       grid.push([]);
@@ -27,7 +38,7 @@ class Grid implements IGrid {
     return grid;
   }
 
-  configureCells (algorithm?: Function): number[][] {
+  configureCells(algorithm?: Function): number[][] {
     this.grid = this.createMatrix();
     let gridConnections = [];
     this.grid.forEach(row => {
@@ -61,7 +72,7 @@ class Grid implements IGrid {
     return gridConnections;
   }
 
-  getCell (row, column): ICell {
+  getCell(row, column): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
@@ -73,30 +84,30 @@ class Grid implements IGrid {
    * @returns {string}
    *
    */
-  allCellConnectionsAsStr (): string {
+  allCellConnectionsAsStr(): string {
     return this.allCellConnections.reduce((prev, row) => {
       return prev + row.join('') + '|';
     }, '');
   }
 
-  randomCell (): ICell {
+  randomCell(): ICell {
     const row = Math.floor(Math.random() * this.rows);
     const column = Math.floor(Math.random() * this.columns);
 
     return this.grid[row][column];
   }
 
-  size (): number {
+  size(): number {
     return this.rows * this.columns;
   }
 
-  eachCell () {
+  eachCell() {
     return this.grid.reduce((prev, curr, currIndex) => {
       return prev.concat(curr);
     }, []);
   }
 
-  getDistances (root) {
+  getDistances(root) {
     let distances = new Distance(root.id);
     let frontier = [root];
     let currDistance = 1;
@@ -120,7 +131,7 @@ class Grid implements IGrid {
     return distances;
   }
 
-  print (): string {
+  print(): string {
     let corner = '+';
     let output = `${corner}${('---' + corner).repeat(this.columns)}\n`;
     this.grid.forEach((row: ICell[]) => {

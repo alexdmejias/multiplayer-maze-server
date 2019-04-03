@@ -1,7 +1,8 @@
 import Binary from './binary';
+import { IAlgos } from '../../_interfaces';
 
-const algos = {
-  'Binary': Binary.bind(this)
-};
+const algos: IAlgos = {
+  binary: Binary
+}
 
 export default algos;

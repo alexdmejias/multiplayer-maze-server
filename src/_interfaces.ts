@@ -31,11 +31,21 @@ export interface IConfig {
   durationIntermission: number;
 }
 
+export interface IAlgos {
+  binary: Function;
+}
+
 export interface IGrid {
   grid: ICell[][];
   rows: number;
   columns;
   print(): string;
+}
+
+export interface IGridConfig {
+  algo?: string;
+  rows: number;
+  columns: number;
 }
 
 export interface ICellNeighbors {

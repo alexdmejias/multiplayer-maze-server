@@ -1,30 +1,30 @@
-import * as sillyname from 'sillyname';
+import sillyname from 'sillyname';
 import { IPlayer, IPlayers, IPLayersManager } from './_interfaces';
 import Player from './Player';
 
 class PLayersManager implements IPLayersManager {
   players: IPlayers = {};
 
-  private findPlayer (playerId: string): IPlayer | null {
+  private findPlayer(playerId: string): IPlayer | null {
     return this.players[playerId];
   }
 
-  getPlayerKeys (): string[] {
+  getPlayerKeys(): string[] {
     return Object.keys(this.players);
   }
 
-  getAllPlayers (): IPlayers {
+  getAllPlayers(): IPlayers {
     return this.players;
   }
 
-  addPlayer (newPlayerId): string {
+  addPlayer(newPlayerId): string {
     const playerUsername = sillyname();
     this.players[newPlayerId] = new Player(newPlayerId, playerUsername);
 
     return playerUsername;
   }
 
-  removePlayer (playerId: string): boolean {
+  removePlayer(playerId: string): boolean {
     const player = this.findPlayer(playerId);
     if (player) {
       delete this.players[playerId];
@@ -34,7 +34,7 @@ class PLayersManager implements IPLayersManager {
     }
   }
 
-  playerScored (playerId: string, score: number): boolean {
+  playerScored(playerId: string, score: number): boolean {
     const player = this.findPlayer(playerId);
     if (player) {
       player.updateScore(score);
@@ -44,7 +44,7 @@ class PLayersManager implements IPLayersManager {
     }
   }
 
-  changeUsername (playerId: string, newUsername): boolean {
+  changeUsername(playerId: string, newUsername): boolean {
     const player = this.findPlayer(playerId);
     if (player) {
       player.changeUsername(newUsername);
