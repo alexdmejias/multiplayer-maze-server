@@ -53,12 +53,12 @@ class StateMachine implements IStateMachine {
     const methodizedName = this._makeMethodName(transitionToCall);
 
     if (this.methods[methodizedName] && this.transitions.hasOwnProperty(transitionToCall)) {
-      const { duration } = this.transitions[transitionToCall]
+      const { duration, to } = this.transitions[transitionToCall]
+      this.currentTransition = to;
 
       logger.debug(`SM.calling ${methodizedName}, should call next method in ${duration}`);
 
       this.methods[methodizedName]();
-      this.currentTransition = transitionToCall;
 
       this.timer = setTimeout(() => {
         const next = this.transitions[transitionToCall].to;
