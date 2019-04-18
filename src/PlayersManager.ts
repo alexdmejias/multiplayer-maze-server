@@ -1,5 +1,5 @@
 import sillyname from 'sillyname';
-import { IPlayer, IPlayers, IPLayersManager } from './_interfaces';
+import { IPlayer, IPlayers, IPLayersManager, IPlayersSerialized } from './_interfaces';
 import Player from './Player';
 
 class PLayersManager implements IPLayersManager {
@@ -13,8 +13,11 @@ class PLayersManager implements IPLayersManager {
     return Object.keys(this.players);
   }
 
-  getAllPlayers(): IPlayers {
-    return this.players;
+  getAllPlayers(): IPlayersSerialized {
+    return {
+      byId: this.players,
+      ids: Object.keys(this.players)
+    };
   }
 
   addPlayer(newPlayerId): string {

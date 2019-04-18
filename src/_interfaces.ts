@@ -10,6 +10,11 @@ export interface IPlayers {
   [s: string]: IPlayer;
 }
 
+export interface IPlayersSerialized {
+  byId: IPlayers,
+  ids: string[]
+}
+
 export interface IUtils {
   ddp(message: string, playerId: string): void;
   printLeaderBoard(players: IPlayers): void;

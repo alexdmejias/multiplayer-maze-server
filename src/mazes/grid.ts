@@ -90,6 +90,10 @@ class Grid implements IGrid {
     }, '');
   }
 
+  getAllCellConnections(): number[][] {
+    return this.allCellConnections;
+  }
+
   randomCell(): ICell {
     const row = Math.floor(Math.random() * this.rows);
     const column = Math.floor(Math.random() * this.columns);

@@ -30,21 +30,35 @@ const gridConfig = {
 };
 
 let roundStartTime = 0;
-let currentMaze;
+let currentMaze: gridPayload;
 
-function generateMaze(props) {
+interface gridPayload {
+  maze: number[][],
+  rows: number,
+  columns: number,
+  starting: [number, number],
+  ending: [number, number]
+}
+
+function generateMaze(props): gridPayload {
   logger.debug('app.generating maze');
   const maze = new Grid(props);
-  const mazeConnections = maze.allCellConnectionsAsStr();
+  const mazeConnections = maze.getAllCellConnections();
   console.log(maze.print());
   // const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
 
-  return mazeConnections;
+  return {
+    maze: mazeConnections,
+    rows: props.rows,
+    columns: props.columns,
+    starting: [9, 0],
+    ending: [0, 9]
+  }
 }
 
 const transitions: ITransitions = {
   'playing': {
-    duration: 5000,
+    duration: 600000,
     to: 'waiting',
     from: 'playing',
     // name: 'playing'
@@ -66,66 +80,29 @@ const STATEMACHINE = new StateMachine({
       roundStartTime = Date.now();
     },
     onEnterState: (from, to) => {
+      console.log('alexalex - >>>>>>>>>>', STATEMACHINE.currentTransition);
       io.emit('state-change', {
-        players: playersManager.getAllPlayers(),
+        opponents: playersManager.getAllPlayers(),
         currentState: STATEMACHINE.currentTransition,
-        maze: currentMaze,
+        grid: currentMaze,
       })
     }
   },
   transitions
 });
 
-// const wasd = new StateMachine.StateMachine({
-// const STATEMACHINE = new StateMachine.create({
-//   init: STATES.WAITING.name,
-//   transitions: [
-//     { name: 'wait', from: STATES.PLAYING.name, to: STATES.WAITING.name },
-//     { name: 'play', from: STATES.WAITING.name, to: STATES.PLAYING.name }
-//   ],
-//   methods: {
-//     onWait: () => {
-//       currentMaze = generateMaze(pppp);
+// function getStateChangePayload(nextStage) {
+//   const payload: { gameState: string; maze?: string } = {
+//     // TODO: ewww
+//     gameState: nextStage
+//   };
 
-//       io.emit('players-update', playersManager.getAllPlayers());
-//       setTimeout(() => {
-//         STATEMACHINE.play();
-//       }, STATES.WAITING.duration);
-//     },
-//     onPlay: () => {
-//       currentMaze = generateMaze(pppp);
-//       roundStartTime = Date.now();
-//       setTimeout(() => {
-//         STATEMACHINE.wait();
-//       }, STATES.PLAYING.duration);
-//     },
-//     // APPLIES TO ALL STATES
-//     onEnterState: (lifecycle: { from?: any; to?: any; }) => {
-//       console.log(
-//         chalk.bgYellow.black(
-//           `FSM: transitioning states...  from: ${lifecycle.from}, to: ${
-//           lifecycle.to
-//           }, ${Object.keys(lifecycle)}`
-//         )
-//       );
-
-//       io.emit(`fsm-state-change`, getStateChangePayload(lifecycle.to));
-//     }
+//   if (nextStage === 'playing') {
+//     payload.maze = currentMaze;
 //   }
-// });
 
-function getStateChangePayload(nextStage) {
-  const payload: { gameState: string; maze?: string } = {
-    // TODO: ewww
-    gameState: nextStage
-  };
-
-  if (nextStage === 'playing') {
-    payload.maze = currentMaze;
-  }
-
-  return payload;
-}
+//   return payload;
+// }
 
 function init() {
   logger.debug('app.initiating game loop');
@@ -145,9 +122,9 @@ io.on('connection', socket => {
   );
 
   socket.emit('init-connection', {
-    players: playersManager.getAllPlayers(),
-    currentState: STATEMACHINE.currentTransition,
-    maze: currentMaze,
+    opponents: playersManager.getAllPlayers(),
+    currentState: 'playing',
+    grid: currentMaze,
     username: newPlayer,
     id: socket.id
   });
@@ -161,7 +138,7 @@ io.on('connection', socket => {
     const score = utils.calculateScore(roundStartTime);
     playersManager.playerScored(socket.id, score);
     const allPlayers = playersManager.getAllPlayers();
-    utils.printLeaderBoard(allPlayers);
+    // utils.printLeaderBoard(allPlayers);
     io.emit('players-update', allPlayers);
   });
 
