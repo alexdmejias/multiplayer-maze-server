@@ -3,7 +3,7 @@ export interface IPlayer {
   id: string;
   username: string;
   changeUsername(newUsername: string): void;
-  updateScore(score: number): void;
+  updateScore(score: number): number;
 }
 
 export interface IPlayers {
@@ -51,6 +51,7 @@ export interface IGridConfig {
   algo?: string;
   rows: number;
   columns: number;
+  cellSize?: number;
 }
 
 export interface ICellNeighbors {
