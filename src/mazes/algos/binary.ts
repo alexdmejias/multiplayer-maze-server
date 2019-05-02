@@ -1,12 +1,20 @@
-import {IGrid, ICell} from '../../_interfaces';
+import { IGrid, ICell, GridConnections } from '../../_interfaces';
 
-export default (grid: IGrid): number[][] => {
-  const gridConnections = [];
+// 1 no link no neighbor
+// 2 link to north no neighbor to east
+// 3 link to east no neighbor to north
+// 5 link to north neighbor to east
+// 6 link to east neighbor north
+
+
+export default (grid: IGrid): GridConnections => {
+  const gridConnections: GridConnections = [];
   grid.grid.forEach((row) => {
-    const rowConnections = [];
+    const rowConnections: number[] = [];
+
     row.forEach((cell) => {
-      let neighbors = [];
       let neighborsId = .5;
+      let neighbors = [];
 
       if (cell.neighbors.north) {
         neighbors.push(cell.neighbors.north);
@@ -17,12 +25,6 @@ export default (grid: IGrid): number[][] => {
         neighbors.push(cell.neighbors.east);
         neighborsId *= 4;
       }
-
-      // 1 no link no neighbor
-      // 2 link to north
-      // 3 link to east
-      // 5 link to north neighbor to east
-      // 6 link to east neighbor north
 
       if (neighborsId < 1) {
         neighborsId = 0;

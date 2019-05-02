@@ -1,6 +1,6 @@
 import Cell from './cell';
 import Distance from './distance';
-import { IGrid, ICell, IGridConfig } from '../_interfaces';
+import { IGrid, ICell, IGridConfig, GridConnections } from '../_interfaces';
 import Algos from './algos';
 import logger from '../logger';
 
@@ -9,7 +9,7 @@ class Grid implements IGrid {
   columns: number;
   algo: Function;
   grid: ICell[][];
-  allCellConnections: number[][];
+  allCellConnections: GridConnections;
 
   constructor(config: IGridConfig) {
     this.rows = config.rows;
@@ -38,11 +38,11 @@ class Grid implements IGrid {
     return grid;
   }
 
-  configureCells(algorithm?: Function): number[][] {
+  configureCells(algorithm?: Function): GridConnections {
     this.grid = this.createMatrix();
     let gridConnections = [];
     this.grid.forEach(row => {
-      const rowConnections = [];
+      const rowConnections: number[] = [];
       row.forEach(cell => {
         const { row, column } = cell;
 
@@ -52,11 +52,6 @@ class Grid implements IGrid {
         cell.setNeighbors('south', this.getCell(row + 1, column));
         cell.setNeighbors('west', this.getCell(row, column - 1));
         cell.setNeighbors('east', this.getCell(row, column + 1));
-
-        cell.position = {
-          top: cell.row * 10,
-          left: cell.column * 10
-        };
 
         rowConnections.push(0);
         cell.neighborsId = 0;
@@ -72,7 +67,7 @@ class Grid implements IGrid {
     return gridConnections;
   }
 
-  getCell(row, column): ICell {
+  getCell(row: number, column: number): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
@@ -90,7 +85,7 @@ class Grid implements IGrid {
     }, '');
   }
 
-  getAllCellConnections(): number[][] {
+  getAllCellConnections(): GridConnections {
     return this.allCellConnections;
   }
 
@@ -111,29 +106,60 @@ class Grid implements IGrid {
     }, []);
   }
 
-  getDistances(root) {
-    let distances = new Distance(root.id);
-    let frontier = [root];
-    let currDistance = 1;
-    distances.set(root.id, 0);
+  // setCellTypes(): GridConnections {
+  //   const gridConnections: GridConnections = [];
 
-    while (frontier.length > 0) {
-      const newFrontier = [];
+  //   this.grid.forEach(row => {
+  //     const rowConnections: number[] = [];
+  //     row.forEach(cell => {
+  //       let neighborId = .5;
+  //       if (cell.neighbors.north) {
+  //         console.log('alexalex - ++++++++++', 'x2');
+  //         neighborId *= 2;
+  //       }
 
-      frontier.forEach(currCell => {
-        currCell.getLinksIds().forEach(currLink => {
-          if (!distances.get(currLink)) {
-            distances.set(currLink, currDistance);
-            newFrontier.push(currCell.getLink(currLink));
-          }
-        });
-      });
-      frontier = newFrontier;
-      currDistance++;
-    }
+  //       if (cell.neighbors.east) {
+  //         neighborId *= 4;
+  //         console.log('alexalex - ++++++++++', 'x4');
+  //       }
 
-    return distances;
-  }
+  //       neighborId = (neighborId < 1) ? 0 : neighborId;
+
+  //       console.log('alexalex - >>>>>>>>>>', neighborId);
+  //       rowConnections.push(neighborId);
+  //     });
+
+  //     gridConnections.push(rowConnections);
+  //   });
+
+  //   // this.allCellConnections = gridConnections;
+
+  //   return gridConnections;
+  // }
+
+  // getDistances(root) {
+  //   let distances = new Distance(root.id);
+  //   let frontier = [root];
+  //   let currDistance = 1;
+  //   distances.set(root.id, 0);
+
+  //   while (frontier.length > 0) {
+  //     const newFrontier = [];
+
+  //     frontier.forEach(currCell => {
+  //       currCell.getLinksIds().forEach(currLink => {
+  //         if (!distances.get(currLink)) {
+  //           distances.set(currLink, currDistance);
+  //           newFrontier.push(currCell.getLink(currLink));
+  //         }
+  //       });
+  //     });
+  //     frontier = newFrontier;
+  //     currDistance++;
+  //   }
+
+  //   return distances;
+  // }
 
   print(): string {
     let corner = '+';

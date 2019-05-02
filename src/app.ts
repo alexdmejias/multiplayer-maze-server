@@ -13,6 +13,7 @@ import PlayersManager from './PlayersManager';
 import StateMachine, { ITransitions } from "./StateMachine";
 import logger from './logger';
 import { Socket } from "net";
+import { IAlgos, GridConnections } from "./_interfaces";
 
 SourceMapSupport.install();
 
@@ -33,14 +34,14 @@ let roundStartTime = 0;
 let currentMaze: gridPayload;
 
 interface gridPayload {
-  maze: number[][],
+  maze: GridConnections,
   rows: number,
   columns: number,
   starting: [number, number],
   ending: [number, number]
 }
 
-function generateMaze(props): gridPayload {
+function generateMaze(props: { algo: string, rows: number, columns: number }): gridPayload {
   logger.debug('app.generating maze');
   const maze = new Grid(props);
   const mazeConnections = maze.getAllCellConnections();
@@ -58,13 +59,13 @@ function generateMaze(props): gridPayload {
 
 const transitions: ITransitions = {
   'playing': {
-    duration: 600000,
+    duration: 10000,
     to: 'waiting',
     from: 'playing',
     // name: 'playing'
   },
   'waiting': {
-    duration: 5000,
+    duration: 1000,
     to: 'playing',
     from: 'waiting'
   }
@@ -79,11 +80,12 @@ const STATEMACHINE = new StateMachine({
     onPlaying: () => {
       roundStartTime = Date.now();
     },
-    onEnterState: (from, to) => {
-      console.log('alexalex - >>>>>>>>>>', STATEMACHINE.currentTransition);
+    onEnterState: (from: string, to: string) => {
+      console.log('alexalex - >>>>>>>>>>', to);
+      playersManager.setScoreboard();
       io.emit('state-change', {
-        opponents: playersManager.getAllPlayers(),
-        currentState: STATEMACHINE.currentTransition,
+        opponents: playersManager.getScoreboard(),
+        currentState: to,
         grid: currentMaze,
       })
     }
@@ -121,28 +123,46 @@ io.on('connection', socket => {
     chalk.bgRed.black(`new player joined: ${socket.id} AKA ${newPlayer}`)
   );
 
+  const player = playersManager.getPlayer(socket.id);
+
+  if (!player) {
+    console.log('alexalex - ##########', 'no player found');
+    console.log(socket.id)
+    console.log(playersManager.getAllPlayers())
+  }
+
   socket.emit('init-connection', {
-    opponents: playersManager.getAllPlayers(),
-    currentState: 'playing',
+    opponents: playersManager.getScoreboard(),
+    currentState: STATEMACHINE.currentTransition,
     grid: currentMaze,
-    username: newPlayer,
-    id: socket.id
+    player: player || { nope: 'nope' }
   });
 
   socket.on('disconnect', () => {
     playersManager.removePlayer(socket.id);
   });
 
-  socket.on('player:scored', data => {
+  socket.on('player:scored', (data: any) => {
     utils.ddp('scored', socket.id);
     const score = utils.calculateScore(roundStartTime);
-    playersManager.playerScored(socket.id, score);
-    const allPlayers = playersManager.getAllPlayers();
+    const newScore = playersManager.playerScored(socket.id, score);
+    // const allPlayers = playersManager.getAllPlayers();
     // utils.printLeaderBoard(allPlayers);
-    io.emit('players-update', allPlayers);
+    // const player = playersManager.getPlayer()
+    socket.emit('player-scored', { player: playersManager.getPlayer(socket.id) });
   });
 
-  socket.on('player:changedName', data => {
-    playersManager.changeUsername(socket.id, data.newName);
+  socket.on('player:change-name', (data: any) => {
+    if (playersManager.changeUsername(socket.id, data.newName)) {
+      socket.emit('player:change-name', {
+        status: 'fail',
+        message: 'username already taken'
+      });
+    } else {
+      socket.emit('player-change-name', {
+        status: 'success',
+        message: 'successfully changed username'
+      });
+    }
   });
 });

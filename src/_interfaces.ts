@@ -23,9 +23,10 @@ export interface IUtils {
 
 export interface IPLayersManager {
   players: { [s: string]: IPlayer };
-  addPlayer(player: IPlayer): void;
+  usernames: string[];
+  addPlayer(newPlayerId: string): string;
   removePlayer(playerId: string): boolean;
-  playerScored(playerId: string, score: number);
+  playerScored(playerId: string, score: number): number;
   changeUsername(playerId: string, newUsername: string): boolean;
 }
 
@@ -37,14 +38,15 @@ export interface IConfig {
 }
 
 export interface IAlgos {
-  binary: Function;
+  [k: string]: Function
 }
 
 export interface IGrid {
   grid: ICell[][];
   rows: number;
-  columns;
+  columns: number;
   print(): string;
+  eachCell(): ICell[];
 }
 
 export interface IGridConfig {
@@ -61,21 +63,23 @@ export interface ICellNeighbors {
   west: ICell;
 }
 
+export type Direction = 'north' | 'south' | 'east' | 'west';
+export type GridConnections = number[][];
+
 export interface ICell {
-  neighbors: any;
+  neighbors: { [K in Direction]?: ICell };
+  links: { [K: string]: ICell };
   neighborsId?: number;
   column: number;
   row: number;
   id: string;
   distance: number;
-  setDistance(distance: number);
-  links: any;
-  position?: { top: number; left: number };
-  setLink(link: ICell);
+  // setDistance(distance: number);
+  setLink(link: ICell, bidirectional?: boolean): void;
   getLink(id: string): ICell;
-  delLink(cell: ICell, bidirectional: boolean);
+  // delLink(cell: ICell, bidirectional: boolean);
   getLinksIds(): string[];
-  isLinked(cell: ICell);
-  setNeighbors(direction: string, neighbors: ICell);
-  getNeighbors(direction: string): ICell;
+  isLinked(cell: ICell): ICell | boolean;
+  setNeighbors(direction: Direction, neighbors: ICell): void;
+  getNeighbors(direction: Direction): ICell;
 }

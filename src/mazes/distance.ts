@@ -1,20 +1,26 @@
+import { ICell } from './../_interfaces';
 class Distance {
-  cells = {};
+  cells: { [k: string]: number };
+  root: ICell;
 
-  constructor (rootId) {
+  constructor(root: ICell) {
+    this.root = root;
+    this.cells = {
+      [root.id]: 0
+    }
   }
 
-  get (cellId) {
+  get(cellId: string): number {
     return this.cells[cellId];
   }
 
-  set (cellId, distance) {
+  set(cellId: string, distance: number) {
     if (Object.keys(this.cells).indexOf(cellId) === -1) {
       this.cells[cellId] = distance;
     }
   }
 
-  getKeys () {
+  getKeys() {
     return Object.keys(this.cells);
   }
 

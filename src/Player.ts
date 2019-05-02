@@ -5,18 +5,19 @@ class Player implements IPlayer {
   username: string;
   currentScore: number = 0;
 
-  constructor (id: string, username: string) {
+  constructor(id: string, username: string) {
     this.id = id;
     this.username = username;
     this.currentScore = 0;
   }
 
-  changeUsername (newUsername: string): void {
+  changeUsername(newUsername: string): void {
     this.username = newUsername;
   }
 
-  updateScore (newScore: number): void {
+  updateScore(newScore: number): number {
     this.currentScore += newScore;
+    return this.currentScore;
   }
 }
 

@@ -4,13 +4,19 @@ import Player from './Player';
 
 class PLayersManager implements IPLayersManager {
   players: IPlayers = {};
+  usernames: string[] = [];
+  scoreboard: string[] = [];
 
-  private findPlayer(playerId: string): IPlayer | null {
+  private findPlayer(playerId: string): IPlayer {
     return this.players[playerId];
   }
 
   getPlayerKeys(): string[] {
     return Object.keys(this.players);
+  }
+
+  getPlayer(playerId: string): IPlayer {
+    return this.findPlayer(playerId);
   }
 
   getAllPlayers(): IPlayersSerialized {
@@ -20,9 +26,10 @@ class PLayersManager implements IPLayersManager {
     };
   }
 
-  addPlayer(newPlayerId): string {
+  addPlayer(newPlayerId: string): string {
     const playerUsername = sillyname();
     this.players[newPlayerId] = new Player(newPlayerId, playerUsername);
+    this.usernames.push(playerUsername);
 
     return playerUsername;
   }
@@ -30,6 +37,8 @@ class PLayersManager implements IPLayersManager {
   removePlayer(playerId: string): boolean {
     const player = this.findPlayer(playerId);
     if (player) {
+      const index = this.usernames.indexOf(player.username);
+      this.usernames.slice(index, 1);
       delete this.players[playerId];
       return true;
     } else {
@@ -37,24 +46,55 @@ class PLayersManager implements IPLayersManager {
     }
   }
 
-  playerScored(playerId: string, score: number): boolean {
+  playerScored(playerId: string, score: number): number {
     const player = this.findPlayer(playerId);
     if (player) {
-      player.updateScore(score);
+      return player.updateScore(score);
+    } else {
+      return 0;
+    }
+  }
+
+  usernameExists(username: string): boolean {
+    return this.usernames.indexOf(username) > -1;
+  }
+
+  changeUsername(playerId: string, newUsername: string): boolean {
+    const player = this.findPlayer(playerId);
+    if (player && !this.usernameExists(newUsername)) {
+      player.changeUsername(newUsername);
       return true;
     } else {
       return false;
     }
   }
 
-  changeUsername(playerId: string, newUsername): boolean {
-    const player = this.findPlayer(playerId);
-    if (player) {
-      player.changeUsername(newUsername);
-      return true;
-    } else {
-      return false;
+  setScoreboard(): void {
+    this.scoreboard = Object.values(this.players)
+      .sort((a, b) => a.currentScore < b.currentScore ? 1 : -1)
+      .map(curr => curr.id)
+  }
+
+  // TODO fix top
+  getScoreboard(top: number = 1000, playerId?: string): IPlayersSerialized {
+    let topPlayers = this.scoreboard
+      .slice(0, top)
+      .reduce((acc, curr, index) => {
+        acc.ids.push(curr);
+        acc.byId[curr] = { ...this.players[curr], place: index };
+
+        return acc;
+      }, { ids: [], byId: {} })
+
+    if (playerId) {
+      const playerToAdd = this.getPlayer(playerId);
+      if (playerToAdd && !topPlayers.byId[playerId]) {
+        topPlayers.ids.push(playerId);
+        topPlayers.byId[playerId] = playerToAdd;
+      }
     }
+
+    return topPlayers;
   }
 }
 

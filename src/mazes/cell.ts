@@ -1,14 +1,16 @@
-import {ICell} from '../_interfaces';
+import { ICell, Direction } from '../_interfaces';
+import Distance from './distance';
 
 class Cell implements ICell {
   row: number;
   column: number;
   id: string;
-  distance: number;
-  neighbors: {[k:string]: ICell} = {};
+  distance: any;
+  neighbors: { [K in Direction]?: ICell } = {};
+  // links: { [K: string]: ICell } = {};
+  links: { [K: string]: ICell } = {};
 
-  links = {};
-  constructor (rowArg: number, columnArg: number) {
+  constructor(rowArg: number, columnArg: number) {
     this.row = rowArg;
     this.column = columnArg;
 
@@ -16,26 +18,16 @@ class Cell implements ICell {
   }
 
   // instead of creating a setter for each direction
-  setNeighbors (direction, value) {
-    this.neighbors[direction] = value;
+  setNeighbors(direction: Direction, neighbor: ICell) {
+    this.neighbors[direction] = neighbor;
   }
 
   // instead of creating a getter for each direction
-  getNeighbors (direction): ICell {
+  getNeighbors(direction: Direction): ICell {
     return this.neighbors[direction];
   }
 
-  getAllNeighbors (): ICell[] {
-    const list = [];
-    for (let direction in this.neighbors) {
-      if (this.neighbors[direction]) {
-        list.push(direction);
-      }
-    }
-    return list;
-  }
-
-  setLink (cell, bidirectional = true) {
+  setLink(cell: ICell, bidirectional = true) {
     this.links[cell.id] = cell;
 
     if (bidirectional) {
@@ -44,38 +36,40 @@ class Cell implements ICell {
     return this;
   }
 
-  delLink (cell, bidirectional = true) {
+  delLink(cell: ICell, bidirectional = true) {
     delete this.links[cell.id];
 
     if (bidirectional) {
       delete cell.links[this.id];
     }
-    return this;
+    // return this;
   }
 
-  getLinksIds () {
+  getLinksIds() {
     return Object.keys(this.links);
   }
 
-  getLink (id) {
+  getLink(id: string): ICell {
     return this.links[id];
   }
 
-  isLinked (cell) {
-    if (cell) {
-      if (this.links[cell.id]) {
-        return this.links[cell.id];
-      } else {
-        return false;
-      }
+  isLinked(cell: ICell): ICell | boolean {
+    if (cell && cell.id && this.links[cell.id]) {
+      return this.links[cell.id];
     } else {
       return false;
     }
   }
 
-  setDistance (dis) {
-    this.distance = dis;
-  }
+  // setDistance(dis) {
+  //   this.distance = dis;
+  // }
+
+  // distances() {
+  //   const distances = new Distance(this);
+
+  //   const frontier = [this]
+  // }
 
 }
 
