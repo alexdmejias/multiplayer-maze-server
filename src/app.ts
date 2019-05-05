@@ -14,7 +14,7 @@ import StateMachine, { ITransitions } from "./StateMachine";
 import logger from './logger';
 import { Socket } from "net";
 import { IAlgos, GridConnections } from "./_interfaces";
-
+import Algos from './mazes/algos';
 SourceMapSupport.install();
 
 const app = express();
@@ -44,12 +44,13 @@ interface gridPayload {
 function generateMaze(props: { algo: string, rows: number, columns: number }): gridPayload {
   logger.debug('app.generating maze');
   const maze = new Grid(props);
-  const mazeConnections = maze.getAllCellConnections();
+  const cons = maze.transformGrid(Algos.binary)
+  // const mazeConnections = maze.makeMatrixFromDictConnections();
   console.log(maze.print());
   // const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
 
   return {
-    maze: mazeConnections,
+    maze: cons,
     rows: props.rows,
     columns: props.columns,
     starting: [9, 0],
@@ -126,9 +127,9 @@ io.on('connection', socket => {
   const player = playersManager.getPlayer(socket.id);
 
   if (!player) {
-    console.log('alexalex - ##########', 'no player found');
-    console.log(socket.id)
-    console.log(playersManager.getAllPlayers())
+    // console.log('alexalex - ##########', 'no player found');
+    // console.log(socket.id)
+    // console.log(playersManager.getAllPlayers())
   }
 
   socket.emit('init-connection', {

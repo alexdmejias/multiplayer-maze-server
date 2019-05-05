@@ -22,6 +22,10 @@ class Cell implements ICell {
     this.neighbors[direction] = neighbor;
   }
 
+  toString(): string {
+    return `${this.row}-${this.column}`;
+  }
+
   // instead of creating a getter for each direction
   getNeighbors(direction: Direction): ICell {
     return this.neighbors[direction];
@@ -53,9 +57,12 @@ class Cell implements ICell {
     return this.links[id];
   }
 
-  isLinked(cell: ICell): ICell | boolean {
-    if (cell && cell.id && this.links[cell.id]) {
-      return this.links[cell.id];
+  isLinked(cell: ICell | string): ICell | boolean {
+    if (!cell) return false;
+    let cellId = typeof cell === 'string' ? cell : cell.id;
+
+    if (this.links[cellId]) {
+      return this.links[cellId];
     } else {
       return false;
     }

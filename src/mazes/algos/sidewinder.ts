@@ -1,53 +1,55 @@
-import { IGrid, ICell, GridConnections } from '../../_interfaces';
-import _random from 'lodash.random';
-import _sample from 'lodash.sample';
+export default () => { };
 
-// 1 no link no neighbor
-// 2 link to north no neighbor to east
-// 3 link to east no neighbor to north
-// 5 link to north neighbor to east
-// 6 link to east neighbor north
-export default (grid: IGrid): GridConnections => {
-  const gridConnections: GridConnections = [];
-  grid.grid.forEach((row) => {
-    const rowConnections: number[] = [];
-    let run: ICell[] = [];
+// import { IGrid, ICell, GridConnections } from '../../_interfaces';
+// import _random from 'lodash.random';
+// import _sample from 'lodash.sample';
 
-    row.forEach(cell => {
-      let neighborsId = .5;
-      run.push(cell)
-      let atEasternBoundry = false;
-      let atNorthernBoundry = false;
+// // 1 no link no neighbor
+// // 2 link to north no neighbor to east
+// // 3 link to east no neighbor to north
+// // 5 link to north neighbor to east
+// // 6 link to east neighbor north
+// export default (grid: IGrid): GridConnections => {
+//   const gridConnections: GridConnections = [];
+//   grid.grid.forEach((row) => {
+//     const rowConnections: number[] = [];
+//     let run: ICell[] = [];
 
-      if (cell.neighbors.north) {
-        // neighbors.push(cell.neighbors.north);
-        neighborsId *= 2;
-      }
+//     row.forEach(cell => {
+//       let neighborsId = .5;
+//       run.push(cell)
+//       let atEasternBoundry = false;
+//       let atNorthernBoundry = false;
 
-      if (cell.neighbors.east) {
-        // neighbors.push(cell.neighbors.east);
-        neighborsId *= 4;
-      }
+//       if (cell.neighbors.north) {
+//         // neighbors.push(cell.neighbors.north);
+//         neighborsId *= 2;
+//       }
 
-      const shouldCloseOut = atEasternBoundry || (!atNorthernBoundry && _random());
+//       if (cell.neighbors.east) {
+//         // neighbors.push(cell.neighbors.east);
+//         neighborsId *= 4;
+//       }
 
-      if (shouldCloseOut) {
-        const member: ICell = _sample(run);
+//       const shouldCloseOut = atEasternBoundry || (!atNorthernBoundry && _random());
 
-        console.log('alexalex - ----------', member);
-        if (member.neighbors.north) {
-          member.setLink(member.neighbors.north);
+//       if (shouldCloseOut) {
+//         const member: ICell = _sample(run);
 
-          run = [];
-        }
-      } else if (cell.neighbors.east) {
-        cell.setLink(cell.neighbors.east)
-      }
+//         console.log('alexalex - ----------', member);
+//         if (member.neighbors.north) {
+//           member.setLink(member.neighbors.north);
 
-      rowConnections.push(neighborsId);
-    });
-    gridConnections.push(rowConnections);
-  });
+//           run = [];
+//         }
+//       } else if (cell.neighbors.east) {
+//         cell.setLink(cell.neighbors.east)
+//       }
 
-  return gridConnections;
-};
+//       rowConnections.push(neighborsId);
+//     });
+//     gridConnections.push(rowConnections);
+//   });
+
+//   return gridConnections;
+// };

@@ -38,13 +38,17 @@ export interface IConfig {
 }
 
 export interface IAlgos {
-  [k: string]: Function
+  [k: string]: (grid: IGrid) => GridConnections;
 }
+
+export type CellDictionary = { [k: string]: ICell };
 
 export interface IGrid {
   grid: ICell[][];
+  grid2: CellDictionary;
   rows: number;
   columns: number;
+  makeMatrixFromDict(): ICell[][];
   print(): string;
   eachCell(): ICell[];
 }
@@ -67,7 +71,7 @@ export type Direction = 'north' | 'south' | 'east' | 'west';
 export type GridConnections = number[][];
 
 export interface ICell {
-  neighbors: { [K in Direction]?: ICell };
+  neighbors: { [K in Direction]?: ICell | string };
   links: { [K: string]: ICell };
   neighborsId?: number;
   column: number;
@@ -79,7 +83,7 @@ export interface ICell {
   getLink(id: string): ICell;
   // delLink(cell: ICell, bidirectional: boolean);
   getLinksIds(): string[];
-  isLinked(cell: ICell): ICell | boolean;
+  isLinked(cell: ICell | string): ICell | boolean;
   setNeighbors(direction: Direction, neighbors: ICell): void;
   getNeighbors(direction: Direction): ICell;
 }

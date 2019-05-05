@@ -1,14 +1,17 @@
 import Cell from './cell';
 import Distance from './distance';
-import { IGrid, ICell, IGridConfig, GridConnections } from '../_interfaces';
+import { IGrid, ICell, IGridConfig, GridConnections, CellDictionary } from '../_interfaces';
 import Algos from './algos';
 import logger from '../logger';
+
+
 
 class Grid implements IGrid {
   rows: number;
   columns: number;
   algo: Function;
   grid: ICell[][];
+  grid2: CellDictionary;
   allCellConnections: GridConnections;
 
   constructor(config: IGridConfig) {
@@ -23,7 +26,69 @@ class Grid implements IGrid {
 
     logger.debug('maze.creating grid with this config', config)
 
-    this.allCellConnections = this.configureCells(this.algo);
+    // this.allCellConnections = this.configureCells(this.algo);
+
+    this.grid2 = this.createEmptyGrid();
+    // this.allCellConnections = Algos[config.algo](this);
+  }
+
+  transformGrid(algo: (grid: IGrid) => GridConnections): GridConnections {
+    return algo(this);
+  }
+
+  makeMatrixFromDict(): ICell[][] {
+    const grid: ICell[][] = [];
+
+    for (let i = 0; i < this.rows; i++) {
+      const row: ICell[] = [];
+      for (let j = 0; j < this.columns; j++) {
+        row.push(this.grid2[`${i}-${j}`]);
+      }
+
+      grid.push(row);
+    }
+
+    return grid;
+  }
+
+  makeMatrixFromDictConnections(): number[][] {
+    const grid: number[][] = [];
+
+    for (let i = 0; i < this.rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < this.columns; j++) {
+        row.push(this.grid2[`${i}-${j}`].neighborsId);
+      }
+
+      grid.push(row);
+    }
+
+    return grid;
+  }
+
+  createEmptyGrid(): CellDictionary {
+    const grid: CellDictionary = {};
+
+    for (let i = this.rows - 1; i >= 0; i--) {
+      for (let j = this.columns - 1; j >= 0; j--) {
+        const hasNorth = i !== 0;
+        const hasEast = j !== (this.columns - 1);
+        const cell: ICell = new Cell(i, j);
+        cell.neighborsId = 0;
+
+        if (hasNorth) {
+          cell.neighbors.north = `${i - 1}-${j}`;
+        }
+
+        if (hasEast) {
+          cell.neighbors.east = `${i}-${j + 1}`;
+        }
+
+        grid[`${i}-${j}`] = cell;
+      }
+    }
+
+    return grid;
   }
 
   createMatrix(): Cell[][] {
@@ -164,7 +229,7 @@ class Grid implements IGrid {
   print(): string {
     let corner = '+';
     let output = `${corner}${('---' + corner).repeat(this.columns)}\n`;
-    this.grid.forEach((row: ICell[]) => {
+    this.makeMatrixFromDict().forEach((row: ICell[]) => {
       let top = '|';
       let bottom = corner;
       row.forEach((cell: ICell) => {

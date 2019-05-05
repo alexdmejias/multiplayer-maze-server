@@ -9,7 +9,7 @@ import { IGrid, ICell, GridConnections } from '../../_interfaces';
 
 export default (grid: IGrid): GridConnections => {
   const gridConnections: GridConnections = [];
-  grid.grid.forEach((row) => {
+  grid.makeMatrixFromDict().forEach((row) => {
     const rowConnections: number[] = [];
 
     row.forEach((cell) => {
@@ -34,7 +34,8 @@ export default (grid: IGrid): GridConnections => {
       let neighbor = neighbors[index];
 
       if (neighbor) {
-        cell.setLink(neighbor);
+        const neighborCell = grid.grid2[neighbor];
+        cell.setLink(neighborCell);
       }
 
       cell.neighborsId = neighborsId + (index + 1);

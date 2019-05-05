@@ -4,7 +4,7 @@ import Sidewinder from './sidewinder';
 
 const algos: IAlgos = {
   binary: Binary,
-  sidewinder: Sidewinder
+  // sidewinder: Sidewinder
 }
 
 export default algos;
