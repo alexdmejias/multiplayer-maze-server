@@ -1,12 +1,11 @@
 import { Direction, CellId } from './../../_interfaces';
-import { IGrid, ICell, GridConnections } from '../../_interfaces';
+import { IGrid, GridConnections } from '../../_interfaces';
 
 // 1 no link no neighbor
 // 2 link to north no neighbor to east
 // 3 link to east no neighbor to north
 // 5 link to north neighbor to east
 // 6 link to east neighbor north
-
 
 export default (grid: IGrid): GridConnections => {
   const gridConnections: GridConnections = [];
@@ -35,7 +34,6 @@ export default (grid: IGrid): GridConnections => {
       let neighbor = neighbors[index];
 
       if (neighbor) {
-        // cell.setLink(neighbor.cell, neighbor.direction);
         grid.linkCells(cell.id, neighbor.direction)
       }
 

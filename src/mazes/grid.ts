@@ -28,10 +28,7 @@ class Grid implements IGrid {
 
     logger.debug('maze.creating grid with this config', config)
 
-    // this.allCellConnections = this.configureCells(this.algo);
-
     this.grid2 = this.createEmptyGrid();
-    // this.allCellConnections = Algos[config.algo](this);
   }
 
   transformGrid(algo: (grid: IGrid) => GridConnections): GridConnections {
@@ -79,14 +76,14 @@ class Grid implements IGrid {
         cell.neighborsId = 0;
 
         if (hasNorth) {
-          cell.neighbors.north = `${i - 1}-${j}`;
+          cell.neighbors.north = makeIdFromArr([i - 1, j]);
         }
 
         if (hasEast) {
-          cell.neighbors.east = `${i}-${j + 1}`;
+          cell.neighbors.east = makeIdFromArr([i, j + 1]);
         }
 
-        grid[`${i}-${j}`] = cell;
+        grid[makeIdFromArr([i, j])] = cell;
       }
     }
 
@@ -105,51 +102,12 @@ class Grid implements IGrid {
     return grid;
   }
 
-  // configureCells(algorithm?: Function): GridConnections {
-  //   this.grid = this.createMatrix();
-  //   let gridConnections = [];
-  //   this.grid.forEach(row => {
-  //     const rowConnections: number[] = [];
-  //     row.forEach(cell => {
-  //       const { row, column } = cell;
-
-  //       cell.id = `${row}-${column}`;
-
-  //       cell.setNeighbors('north', this.getCell(row - 1, column));
-  //       cell.setNeighbors('south', this.getCell(row + 1, column));
-  //       cell.setNeighbors('west', this.getCell(row, column - 1));
-  //       cell.setNeighbors('east', this.getCell(row, column + 1));
-
-  //       rowConnections.push(0);
-  //       cell.neighborsId = 0;
-  //     });
-
-  //     gridConnections.push(rowConnections);
-  //   });
-
-  //   if (algorithm) {
-  //     gridConnections = algorithm(this, 10);
-  //   }
-
-  //   return gridConnections;
-  // }
-
   getCell(row: number, column: number): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
   }
 
-  // wasd(baseCellId: CellId, direction: Direction): {
-
-  // }
-
-  // setLink(cell: CellId, direction: Direction, bidirectional = true) {
-  // linkCells(baseCellId: CellId, direction: Direction, bidirectional = true) {
-  //   const baseCell = this.grid2[baseCellId];
-  //   const cellFromDirection: ICell = ;
-  //   baseCell.setLink(cellFromDirection.id, direction, bidirectional);
-  // }
   linkCells(baseCell: CellId, direction: Direction): void {
     const wasd = parsedIdFromStr(baseCell);
     const newLink = getNeighborPosition(direction, wasd[0], wasd[1]);
@@ -192,37 +150,6 @@ class Grid implements IGrid {
     }, []);
   }
 
-  // setCellTypes(): GridConnections {
-  //   const gridConnections: GridConnections = [];
-
-  //   this.grid.forEach(row => {
-  //     const rowConnections: number[] = [];
-  //     row.forEach(cell => {
-  //       let neighborId = .5;
-  //       if (cell.neighbors.north) {
-  //         console.log('alexalex - ++++++++++', 'x2');
-  //         neighborId *= 2;
-  //       }
-
-  //       if (cell.neighbors.east) {
-  //         neighborId *= 4;
-  //         console.log('alexalex - ++++++++++', 'x4');
-  //       }
-
-  //       neighborId = (neighborId < 1) ? 0 : neighborId;
-
-  //       console.log('alexalex - >>>>>>>>>>', neighborId);
-  //       rowConnections.push(neighborId);
-  //     });
-
-  //     gridConnections.push(rowConnections);
-  //   });
-
-  //   // this.allCellConnections = gridConnections;
-
-  //   return gridConnections;
-  // }
-
   // getDistances(root) {
   //   let distances = new Distance(root.id);
   //   let frontier = [root];
@@ -259,9 +186,6 @@ class Grid implements IGrid {
         top += body + eastBoundry;
 
         let southBoundry = cell.hasLink('south') ? ' ⇡ ' : '---';
-        if (!cell.hasLink('south')) {
-          console.log('alexalex - >>>>>>>>>>', cell.id);
-        }
         bottom += southBoundry + corner;
       });
       output += top + '\n';
@@ -269,14 +193,6 @@ class Grid implements IGrid {
     });
     return output;
   }
-
-  // getNeighborFromDirection(baseCellId: CellId, direction: Direction): CellId {
-  //   const parsedId: [number, number] = parsedIdFromStr(baseCellId);
-  //   // const oppositeDirection = getOppositeDirection(direction);
-  //   const neighborPostion = getNeighborPosition(direction, parsedId[0], parsedId[1]);
-
-  //   return makeIdFromArr(neighborPostion);
-  // }
 }
 
 export default Grid;

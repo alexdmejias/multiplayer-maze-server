@@ -35,11 +35,6 @@ class Cell implements ICell {
 
   setLink(cell: CellId, direction: Direction, bidirectional = true) {
     this.links[direction] = cell;
-
-    // if (bidirectional) {
-    //   cell.links[this.id] = this;
-    // }
-    // return this;
   }
 
   // delLink(cell: ICell, bidirectional = true) {
@@ -59,17 +54,6 @@ class Cell implements ICell {
     return this.links[direction];
   }
 
-  // isLinked(cell: ICell | string): ICell | boolean {
-  //   if (!cell) return false;
-  //   let cellId = typeof cell === 'string' ? cell : cell.id;
-
-  //   if (this.links[cellId]) {
-  //     return this.links[cellId];
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
   hasLink(direction: Direction): boolean {
     return !!this.links[direction];
   }
@@ -83,7 +67,6 @@ class Cell implements ICell {
 
   //   const frontier = [this]
   // }
-
 }
 
 export default Cell;
