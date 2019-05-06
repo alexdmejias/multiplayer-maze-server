@@ -1,4 +1,4 @@
-import { ICell, Direction } from '../_interfaces';
+import { ICell, Direction, CellId } from '../_interfaces';
 import Distance from './distance';
 
 class Cell implements ICell {
@@ -6,9 +6,9 @@ class Cell implements ICell {
   column: number;
   id: string;
   distance: any;
-  neighbors: { [K in Direction]?: ICell } = {};
+  neighbors = {};
   // links: { [K: string]: ICell } = {};
-  links: { [K: string]: ICell } = {};
+  links = {};
 
   constructor(rowArg: number, columnArg: number) {
     this.row = rowArg;
@@ -22,7 +22,9 @@ class Cell implements ICell {
     this.neighbors[direction] = neighbor;
   }
 
-  toString(): string {
+
+
+  toString(): CellId {
     return `${this.row}-${this.column}`;
   }
 
@@ -31,41 +33,45 @@ class Cell implements ICell {
     return this.neighbors[direction];
   }
 
-  setLink(cell: ICell, bidirectional = true) {
-    this.links[cell.id] = cell;
+  setLink(cell: CellId, direction: Direction, bidirectional = true) {
+    this.links[direction] = cell;
 
-    if (bidirectional) {
-      cell.links[this.id] = this;
-    }
-    return this;
-  }
-
-  delLink(cell: ICell, bidirectional = true) {
-    delete this.links[cell.id];
-
-    if (bidirectional) {
-      delete cell.links[this.id];
-    }
+    // if (bidirectional) {
+    //   cell.links[this.id] = this;
+    // }
     // return this;
   }
+
+  // delLink(cell: ICell, bidirectional = true) {
+  //   delete this.links[cell.id];
+
+  //   if (bidirectional) {
+  //     delete cell.links[this.id];
+  //   }
+  //   // return this;
+  // }
 
   getLinksIds() {
     return Object.keys(this.links);
   }
 
-  getLink(id: string): ICell {
-    return this.links[id];
+  getLink(direction: Direction): CellId {
+    return this.links[direction];
   }
 
-  isLinked(cell: ICell | string): ICell | boolean {
-    if (!cell) return false;
-    let cellId = typeof cell === 'string' ? cell : cell.id;
+  // isLinked(cell: ICell | string): ICell | boolean {
+  //   if (!cell) return false;
+  //   let cellId = typeof cell === 'string' ? cell : cell.id;
 
-    if (this.links[cellId]) {
-      return this.links[cellId];
-    } else {
-      return false;
-    }
+  //   if (this.links[cellId]) {
+  //     return this.links[cellId];
+  //   } else {
+  //     return false;
+  //   }
+  // }
+
+  hasLink(direction: Direction): boolean {
+    return !!this.links[direction];
   }
 
   // setDistance(dis) {

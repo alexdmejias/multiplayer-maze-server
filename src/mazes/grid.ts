@@ -1,8 +1,10 @@
+import { Direction, CellId } from './../_interfaces';
 import Cell from './cell';
 import Distance from './distance';
 import { IGrid, ICell, IGridConfig, GridConnections, CellDictionary } from '../_interfaces';
 import Algos from './algos';
 import logger from '../logger';
+import { getOppositeDirection, getNeighborPosition, parsedIdFromStr, makeIdFromArr } from './utils';
 
 
 
@@ -103,39 +105,58 @@ class Grid implements IGrid {
     return grid;
   }
 
-  configureCells(algorithm?: Function): GridConnections {
-    this.grid = this.createMatrix();
-    let gridConnections = [];
-    this.grid.forEach(row => {
-      const rowConnections: number[] = [];
-      row.forEach(cell => {
-        const { row, column } = cell;
+  // configureCells(algorithm?: Function): GridConnections {
+  //   this.grid = this.createMatrix();
+  //   let gridConnections = [];
+  //   this.grid.forEach(row => {
+  //     const rowConnections: number[] = [];
+  //     row.forEach(cell => {
+  //       const { row, column } = cell;
 
-        cell.id = `${row}-${column}`;
+  //       cell.id = `${row}-${column}`;
 
-        cell.setNeighbors('north', this.getCell(row - 1, column));
-        cell.setNeighbors('south', this.getCell(row + 1, column));
-        cell.setNeighbors('west', this.getCell(row, column - 1));
-        cell.setNeighbors('east', this.getCell(row, column + 1));
+  //       cell.setNeighbors('north', this.getCell(row - 1, column));
+  //       cell.setNeighbors('south', this.getCell(row + 1, column));
+  //       cell.setNeighbors('west', this.getCell(row, column - 1));
+  //       cell.setNeighbors('east', this.getCell(row, column + 1));
 
-        rowConnections.push(0);
-        cell.neighborsId = 0;
-      });
+  //       rowConnections.push(0);
+  //       cell.neighborsId = 0;
+  //     });
 
-      gridConnections.push(rowConnections);
-    });
+  //     gridConnections.push(rowConnections);
+  //   });
 
-    if (algorithm) {
-      gridConnections = algorithm(this, 10);
-    }
+  //   if (algorithm) {
+  //     gridConnections = algorithm(this, 10);
+  //   }
 
-    return gridConnections;
-  }
+  //   return gridConnections;
+  // }
 
   getCell(row: number, column: number): ICell {
     if (this.grid[row] && this.grid[row][column]) {
       return this.grid[row][column];
     }
+  }
+
+  // wasd(baseCellId: CellId, direction: Direction): {
+
+  // }
+
+  // setLink(cell: CellId, direction: Direction, bidirectional = true) {
+  // linkCells(baseCellId: CellId, direction: Direction, bidirectional = true) {
+  //   const baseCell = this.grid2[baseCellId];
+  //   const cellFromDirection: ICell = ;
+  //   baseCell.setLink(cellFromDirection.id, direction, bidirectional);
+  // }
+  linkCells(baseCell: CellId, direction: Direction): void {
+    const wasd = parsedIdFromStr(baseCell);
+    const newLink = getNeighborPosition(direction, wasd[0], wasd[1]);
+    const newLinkId = makeIdFromArr(newLink);
+
+    this.grid2[baseCell].setLink(newLinkId, direction)
+    this.grid2[newLinkId].setLink(baseCell, getOppositeDirection(direction));
   }
 
   /**
@@ -234,10 +255,13 @@ class Grid implements IGrid {
       let bottom = corner;
       row.forEach((cell: ICell) => {
         let body = ` ${cell.neighborsId} `;
-        let eastBoundry = cell.isLinked(cell.neighbors.east) ? '⇢' : '|';
+        let eastBoundry = cell.hasLink('east') ? '⇢' : '|';
         top += body + eastBoundry;
 
-        let southBoundry = cell.isLinked(cell.neighbors.south) ? ' ⇡ ' : '---';
+        let southBoundry = cell.hasLink('south') ? ' ⇡ ' : '---';
+        if (!cell.hasLink('south')) {
+          console.log('alexalex - >>>>>>>>>>', cell.id);
+        }
         bottom += southBoundry + corner;
       });
       output += top + '\n';
@@ -245,6 +269,14 @@ class Grid implements IGrid {
     });
     return output;
   }
+
+  // getNeighborFromDirection(baseCellId: CellId, direction: Direction): CellId {
+  //   const parsedId: [number, number] = parsedIdFromStr(baseCellId);
+  //   // const oppositeDirection = getOppositeDirection(direction);
+  //   const neighborPostion = getNeighborPosition(direction, parsedId[0], parsedId[1]);
+
+  //   return makeIdFromArr(neighborPostion);
+  // }
 }
 
 export default Grid;

@@ -51,6 +51,7 @@ export interface IGrid {
   makeMatrixFromDict(): ICell[][];
   print(): string;
   eachCell(): ICell[];
+  linkCells(baseCell: CellId, direction: Direction): void;
 }
 
 export interface IGridConfig {
@@ -61,29 +62,32 @@ export interface IGridConfig {
 }
 
 export interface ICellNeighbors {
-  north: ICell;
-  south: ICell;
-  east: ICell;
-  west: ICell;
+  north: string;
+  south: string;
+  east: string;
+  west: string;
 }
 
 export type Direction = 'north' | 'south' | 'east' | 'west';
+export type CellId = string;
 export type GridConnections = number[][];
 
 export interface ICell {
-  neighbors: { [K in Direction]?: ICell | string };
-  links: { [K: string]: ICell };
+  neighbors: { [K in Direction]?: string };
+  links: { [K in Direction]?: string };
   neighborsId?: number;
   column: number;
   row: number;
-  id: string;
+  id: CellId;
   distance: number;
   // setDistance(distance: number);
-  setLink(link: ICell, bidirectional?: boolean): void;
-  getLink(id: string): ICell;
+  // getOppositeDirection(direction: Direction): Direction;
+  setLink(link: CellId, direction: Direction, bidirectional?: boolean): void;
+  getLink(direction: Direction): CellId;
   // delLink(cell: ICell, bidirectional: boolean);
-  getLinksIds(): string[];
-  isLinked(cell: ICell | string): ICell | boolean;
+  getLinksIds(): CellId[];
+  // isLinked(cellId: CellId): boolean;
+  hasLink(direction: Direction): boolean;
   setNeighbors(direction: Direction, neighbors: ICell): void;
   getNeighbors(direction: Direction): ICell;
 }

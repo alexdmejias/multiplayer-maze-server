@@ -45,11 +45,11 @@ class PNGViewer extends Grid implements IPNGViewer {
           this.drawWall(this.ctx, x1, y1, x1, y2, 'west');
         }
 
-        if (!cell.isLinked(cell.neighbors.east)) {
+        if (!cell.hasLink('east')) {
           this.drawWall(this.ctx, x2, y1, x2, y2, 'link');
         }
 
-        if (!cell.isLinked(cell.neighbors.south)) {
+        if (!cell.hasLink('south')) {
           this.drawWall(this.ctx, x1, y2, x2, y2, 'link');
         }
       })

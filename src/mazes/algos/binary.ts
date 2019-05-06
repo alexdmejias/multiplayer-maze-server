@@ -1,3 +1,4 @@
+import { Direction, CellId } from './../../_interfaces';
 import { IGrid, ICell, GridConnections } from '../../_interfaces';
 
 // 1 no link no neighbor
@@ -14,15 +15,15 @@ export default (grid: IGrid): GridConnections => {
 
     row.forEach((cell) => {
       let neighborsId = .5;
-      let neighbors = [];
+      let neighbors: { direction: Direction, cell: CellId }[] = [];
 
       if (cell.neighbors.north) {
-        neighbors.push(cell.neighbors.north);
+        neighbors.push({ direction: 'north', cell: cell.neighbors.north });
         neighborsId *= 2;
       }
 
       if (cell.neighbors.east) {
-        neighbors.push(cell.neighbors.east);
+        neighbors.push({ direction: 'east', cell: cell.neighbors.east });
         neighborsId *= 4;
       }
 
@@ -34,8 +35,8 @@ export default (grid: IGrid): GridConnections => {
       let neighbor = neighbors[index];
 
       if (neighbor) {
-        const neighborCell = grid.grid2[neighbor];
-        cell.setLink(neighborCell);
+        // cell.setLink(neighbor.cell, neighbor.direction);
+        grid.linkCells(cell.id, neighbor.direction)
       }
 
       cell.neighborsId = neighborsId + (index + 1);
