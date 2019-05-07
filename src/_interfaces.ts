@@ -49,6 +49,7 @@ export interface IGrid {
   rows: number;
   columns: number;
   makeMatrixFromDict(): ICell[][];
+  makeMatrixFromDictConnections(): GridConnections;
   print(): string;
   eachCell(): ICell[];
   linkCells(baseCell: CellId, direction: Direction): void;
@@ -70,23 +71,25 @@ export interface ICellNeighbors {
 
 export type Direction = 'north' | 'south' | 'east' | 'west';
 export type CellId = string;
-export type GridConnections = number[][];
+export type GridConnections = string[][];
 
 export interface ICell {
   neighbors: { [K in Direction]?: string };
   links: { [K in Direction]?: string };
-  neighborsId?: number;
+  neighborsId: string;
   column: number;
   row: number;
   id: CellId;
   distance: number;
   // setDistance(distance: number);
   // getOppositeDirection(direction: Direction): Direction;
+  getCellType(): string;
   setLink(link: CellId, direction: Direction, bidirectional?: boolean): void;
   getLink(direction: Direction): CellId;
   // delLink(cell: ICell, bidirectional: boolean);
   getLinksIds(): CellId[];
   // isLinked(cellId: CellId): boolean;
+  hasNeighbor(direction: Direction): boolean;
   hasLink(direction: Direction): boolean;
   setNeighbors(direction: Direction, neighbors: ICell): void;
   getNeighbors(direction: Direction): ICell;

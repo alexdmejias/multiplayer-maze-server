@@ -25,7 +25,7 @@ const playersManager = new PlayersManager();
 const utils = new Utils();
 
 const gridConfig = {
-  algo: 'binary',
+  algo: 'sidewinder',
   rows: 10,
   columns: 10
 };
@@ -44,7 +44,7 @@ interface gridPayload {
 function generateMaze(props: { algo: string, rows: number, columns: number }): gridPayload {
   logger.debug('app.generating maze');
   const maze = new Grid(props);
-  const cons = maze.transformGrid(Algos.binary)
+  const cons = maze.transformGrid(Algos[props.algo])
   // const mazeConnections = maze.makeMatrixFromDictConnections();
   console.log(maze.print());
   // const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
@@ -60,7 +60,7 @@ function generateMaze(props: { algo: string, rows: number, columns: number }): g
 
 const transitions: ITransitions = {
   'playing': {
-    duration: 10000,
+    duration: 100000,
     to: 'waiting',
     from: 'playing',
     // name: 'playing'

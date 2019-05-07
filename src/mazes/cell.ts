@@ -7,7 +7,7 @@ class Cell implements ICell {
   id: string;
   distance: any;
   neighbors = {};
-  // links: { [K: string]: ICell } = {};
+  neighborsId: string = '0';
   links = {};
 
   constructor(rowArg: number, columnArg: number) {
@@ -22,7 +22,31 @@ class Cell implements ICell {
     this.neighbors[direction] = neighbor;
   }
 
+  hasNeighbor(direction: Direction): boolean {
+    return !!this.neighbors[direction];
+  }
 
+  getCellType(): string {
+    const scale = [1, 2, 3, 5];
+    let cellType = 0;
+    if (this.hasNeighbor('north')) {
+      cellType += scale[0];
+    }
+
+    if (this.hasNeighbor('east')) {
+      cellType += scale[1];
+    }
+
+    if (this.hasLink('north')) {
+      cellType += scale[2];
+    }
+
+    if (this.hasLink('east')) {
+      cellType += scale[3];
+    }
+
+    return cellType.toString(16);
+  }
 
   toString(): CellId {
     return `${this.row}-${this.column}`;

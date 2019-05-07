@@ -1,55 +1,37 @@
-export default () => { };
+import { IGrid, ICell, GridConnections } from '../../_interfaces';
+import _random from 'lodash.random';
+import _sample from 'lodash.sample';
 
-// import { IGrid, ICell, GridConnections } from '../../_interfaces';
-// import _random from 'lodash.random';
-// import _sample from 'lodash.sample';
+// 1. Work through the grid row-wise, starting with the cell at NW. Initialize the “run” set to be empty.
+// 2. Add the current cell to the “run” set.
+// 3. For the current cell, randomly decide whether to carve east or not.
+// 4. If a passage was carved, make the new cell the current cell and repeat steps 2-4.
+// 5. If a passage was not carved, choose any one of the cells in the run set and carve a passage north. Then empty the
+// run set, set the next cell in the row to be the current cell, and repeat steps 2-5.
+// 6. Continue until all rows have been processed.
 
-// // 1 no link no neighbor
-// // 2 link to north no neighbor to east
-// // 3 link to east no neighbor to north
-// // 5 link to north neighbor to east
-// // 6 link to east neighbor north
-// export default (grid: IGrid): GridConnections => {
-//   const gridConnections: GridConnections = [];
-//   grid.grid.forEach((row) => {
-//     const rowConnections: number[] = [];
-//     let run: ICell[] = [];
+export default (grid: IGrid): GridConnections => {
+  grid.makeMatrixFromDict().forEach(row => {
+    let run: ICell[] = [];
 
-//     row.forEach(cell => {
-//       let neighborsId = .5;
-//       run.push(cell)
-//       let atEasternBoundry = false;
-//       let atNorthernBoundry = false;
+    row.forEach(cell => {
+      run.push(cell);
 
-//       if (cell.neighbors.north) {
-//         // neighbors.push(cell.neighbors.north);
-//         neighborsId *= 2;
-//       }
+      const atEasternBoundry = !cell.neighbors.east;
+      const atNorthernBoundry = !cell.neighbors.north;
+      const shouldCloseOut = atEasternBoundry || (!atNorthernBoundry && _random() === 0);
 
-//       if (cell.neighbors.east) {
-//         // neighbors.push(cell.neighbors.east);
-//         neighborsId *= 4;
-//       }
+      if (shouldCloseOut) {
+        const member = _sample(run);
+        if (member.neighbors.north) {
+          grid.linkCells(member.id, 'north');
+        }
+        run = [];
+      } else {
+        grid.linkCells(cell.id, 'east');
+      }
+    });
+  });
 
-//       const shouldCloseOut = atEasternBoundry || (!atNorthernBoundry && _random());
-
-//       if (shouldCloseOut) {
-//         const member: ICell = _sample(run);
-
-//         console.log('alexalex - ----------', member);
-//         if (member.neighbors.north) {
-//           member.setLink(member.neighbors.north);
-
-//           run = [];
-//         }
-//       } else if (cell.neighbors.east) {
-//         cell.setLink(cell.neighbors.east)
-//       }
-
-//       rowConnections.push(neighborsId);
-//     });
-//     gridConnections.push(rowConnections);
-//   });
-
-//   return gridConnections;
-// };
+  return grid.makeMatrixFromDictConnections();
+};

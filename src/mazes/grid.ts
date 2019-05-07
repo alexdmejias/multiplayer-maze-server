@@ -6,8 +6,6 @@ import Algos from './algos';
 import logger from '../logger';
 import { getOppositeDirection, getNeighborPosition, parsedIdFromStr, makeIdFromArr } from './utils';
 
-
-
 class Grid implements IGrid {
   rows: number;
   columns: number;
@@ -50,15 +48,16 @@ class Grid implements IGrid {
     return grid;
   }
 
-  makeMatrixFromDictConnections(): number[][] {
-    const grid: number[][] = [];
+  makeMatrixFromDictConnections(): string[][] {
+    const grid: string[][] = [];
 
     for (let i = 0; i < this.rows; i++) {
-      const row: number[] = [];
+      const row: string[] = [];
       for (let j = 0; j < this.columns; j++) {
-        row.push(this.grid2[`${i}-${j}`].neighborsId);
+        const cell = this.grid2[`${i}-${j}`];
+        cell.neighborsId = cell.getCellType();
+        row.push(cell.neighborsId);
       }
-
       grid.push(row);
     }
 
@@ -73,7 +72,6 @@ class Grid implements IGrid {
         const hasNorth = i !== 0;
         const hasEast = j !== (this.columns - 1);
         const cell: ICell = new Cell(i, j);
-        cell.neighborsId = 0;
 
         if (hasNorth) {
           cell.neighbors.north = makeIdFromArr([i - 1, j]);
@@ -182,10 +180,10 @@ class Grid implements IGrid {
       let bottom = corner;
       row.forEach((cell: ICell) => {
         let body = ` ${cell.neighborsId} `;
-        let eastBoundry = cell.hasLink('east') ? '⇢' : '|';
+        let eastBoundry = cell.hasLink('east') ? ' ' : '|';
         top += body + eastBoundry;
 
-        let southBoundry = cell.hasLink('south') ? ' ⇡ ' : '---';
+        let southBoundry = cell.hasLink('south') ? '   ' : '---';
         bottom += southBoundry + corner;
       });
       output += top + '\n';

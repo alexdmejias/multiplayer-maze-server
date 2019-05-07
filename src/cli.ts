@@ -14,5 +14,7 @@ inquirer.prompt([{
   .then((answers) => {
     console.log(`creating grid with the ${answers.algo} algorithm`);
     const grid = new Grid({ rows: 10, columns: 10, algo: answers.algo });
+    const cons = grid.transformGrid(Algos[answers.algo])
+    // grid.makeMatrixFromDictConnections();
     console.log(grid.print());
   });
