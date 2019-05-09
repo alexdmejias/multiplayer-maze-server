@@ -30,7 +30,9 @@ class Grid implements IGrid {
   }
 
   transformGrid(algo: (grid: IGrid) => GridConnections): GridConnections {
-    return algo(this);
+    const transformedGrid = algo(this);
+
+    return transformedGrid;
   }
 
   makeMatrixFromDict(): ICell[][] {
@@ -148,29 +150,38 @@ class Grid implements IGrid {
     }, []);
   }
 
-  // getDistances(root) {
-  //   let distances = new Distance(root.id);
-  //   let frontier = [root];
-  //   let currDistance = 1;
-  //   distances.set(root.id, 0);
+  getDistances(): [string, string, number] {
+    let maxDistance = 0;
+    let longestPair = [];
+    Object.values(this.grid2).forEach(topLevelCell => {
+      const d = new Distance(topLevelCell.id);
+      d.set(topLevelCell.id, 0);
+      let frontier = [topLevelCell.id];
 
-  //   while (frontier.length > 0) {
-  //     const newFrontier = [];
+      while (frontier.length > 0) {
+        const newFrontier = [];
 
-  //     frontier.forEach(currCell => {
-  //       currCell.getLinksIds().forEach(currLink => {
-  //         if (!distances.get(currLink)) {
-  //           distances.set(currLink, currDistance);
-  //           newFrontier.push(currCell.getLink(currLink));
-  //         }
-  //       });
-  //     });
-  //     frontier = newFrontier;
-  //     currDistance++;
-  //   }
+        frontier.forEach(cell => {
+          Object.values(this.grid2[cell].links).forEach(linked => {
+            if (d.hasCell(linked)) return;
 
-  //   return distances;
-  // }
+            const newValue = d.get(cell) + 1;
+            d.set(linked, newValue);
+
+            if (newValue > maxDistance) {
+              maxDistance = newValue;
+              longestPair = [d.root, linked]
+            }
+            newFrontier.push(this.grid2[linked].id)
+          })
+        })
+
+        frontier = newFrontier;
+      }
+      topLevelCell.setDistances(d.cells);
+    });
+    return [longestPair[0], longestPair[1], maxDistance];
+  }
 
   print(): string {
     let corner = '+';

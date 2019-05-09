@@ -1,11 +1,11 @@
 import { ICell, Direction, CellId } from '../_interfaces';
-import Distance from './distance';
+// import Distance from './distance';
 
 class Cell implements ICell {
   row: number;
   column: number;
   id: string;
-  distance: any;
+  distances: { [k in CellId]: number };
   neighbors = {};
   neighborsId: string = '0';
   links = {};
@@ -82,15 +82,9 @@ class Cell implements ICell {
     return !!this.links[direction];
   }
 
-  // setDistance(dis) {
-  //   this.distance = dis;
-  // }
-
-  // distances() {
-  //   const distances = new Distance(this);
-
-  //   const frontier = [this]
-  // }
+  setDistances(distances: { [k: string]: number }) {
+    this.distances = distances;
+  }
 }
 
 export default Cell;

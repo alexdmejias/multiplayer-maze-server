@@ -12,9 +12,9 @@ import Grid from './mazes/grid';
 import PlayersManager from './PlayersManager';
 import StateMachine, { ITransitions } from "./StateMachine";
 import logger from './logger';
-import { Socket } from "net";
-import { IAlgos, GridConnections } from "./_interfaces";
+import { IAlgos, GridConnections, gridPayload } from "./_interfaces";
 import Algos from './mazes/algos';
+import { parsedIdFromStr } from "./mazes/utils";
 SourceMapSupport.install();
 
 const app = express();
@@ -33,60 +33,54 @@ const gridConfig = {
 let roundStartTime = 0;
 let currentMaze: gridPayload;
 
-interface gridPayload {
-  maze: GridConnections,
-  rows: number,
-  columns: number,
-  starting: [number, number],
-  ending: [number, number]
-}
-
 function generateMaze(props: { algo: string, rows: number, columns: number }): gridPayload {
   logger.debug('app.generating maze');
   const maze = new Grid(props);
   const cons = maze.transformGrid(Algos[props.algo])
-  // const mazeConnections = maze.makeMatrixFromDictConnections();
-  console.log(maze.print());
-  // const mazeConnectionsSplitIndex: number = -1 * (props.size + 1);
+  const endPosts = maze.getDistances();
 
   return {
     maze: cons,
     rows: props.rows,
     columns: props.columns,
-    starting: [9, 0],
-    ending: [0, 9]
+    starting: parsedIdFromStr(endPosts[0]),
+    ending: parsedIdFromStr(endPosts[1])
   }
 }
 
 const transitions: ITransitions = {
+  'waiting': {
+    duration: (1000 * 5),
+    to: 'playing',
+    from: 'waiting'
+  },
   'playing': {
-    duration: 100000,
+    duration: (1000 * 1000),
     to: 'waiting',
     from: 'playing',
     // name: 'playing'
   },
-  'waiting': {
-    duration: 1000,
-    to: 'playing',
-    from: 'waiting'
-  }
 }
 
 const STATEMACHINE = new StateMachine({
   initTransition: 'waiting',
   methods: {
     onWaiting: () => {
+      const d = new Date();
+      console.log('alexalex - ----------', 'onWaiting', d.getUTCSeconds());
       currentMaze = generateMaze(gridConfig);
     },
     onPlaying: () => {
+      const d = new Date();
+      console.log('alexalex - ++++++++++', 'onPlaying', d.getUTCSeconds());
       roundStartTime = Date.now();
     },
     onEnterState: (from: string, to: string) => {
-      console.log('alexalex - >>>>>>>>>>', to);
       playersManager.setScoreboard();
       io.emit('state-change', {
         opponents: playersManager.getScoreboard(),
         currentState: to,
+        duration: transitions[to].duration,
         grid: currentMaze,
       })
     }
@@ -109,7 +103,6 @@ const STATEMACHINE = new StateMachine({
 
 function init() {
   logger.debug('app.initiating game loop');
-  currentMaze = generateMaze(gridConfig);
   STATEMACHINE.init();
 }
 

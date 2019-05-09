@@ -1,23 +1,23 @@
-import { ICell } from './../_interfaces';
-class Distance {
-  cells: { [k: string]: number };
-  root: ICell;
+import { CellId } from './../_interfaces';
 
-  constructor(root: ICell) {
+class Distance {
+  cells: { [k in CellId]: number } = {};
+  root: CellId;
+
+  constructor(root: CellId) {
     this.root = root;
-    this.cells = {
-      [root.id]: 0
-    }
   }
 
-  get(cellId: string): number {
+  get(cellId: CellId): number {
     return this.cells[cellId];
   }
 
-  set(cellId: string, distance: number) {
-    if (Object.keys(this.cells).indexOf(cellId) === -1) {
-      this.cells[cellId] = distance;
-    }
+  hasCell(cellId: CellId): boolean {
+    return !!this.cells[cellId];
+  }
+
+  set(cellId: CellId, distance: number) {
+    this.cells[cellId] = distance;
   }
 
   getKeys() {

@@ -80,7 +80,7 @@ export interface ICell {
   column: number;
   row: number;
   id: CellId;
-  distance: number;
+  distances: { [k in CellId]: number };
   // setDistance(distance: number);
   // getOppositeDirection(direction: Direction): Direction;
   getCellType(): string;
@@ -93,4 +93,13 @@ export interface ICell {
   hasLink(direction: Direction): boolean;
   setNeighbors(direction: Direction, neighbors: ICell): void;
   getNeighbors(direction: Direction): ICell;
+  setDistances(distances: any): void;
+}
+
+export interface gridPayload {
+  maze: GridConnections,
+  rows: number,
+  columns: number,
+  starting: [number, number],
+  ending: [number, number]
 }
