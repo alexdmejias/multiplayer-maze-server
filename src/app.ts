@@ -1,7 +1,6 @@
 import express from "express";
 import * as http from 'http';
 import chalk from 'chalk';
-// import * as StateMachine from 'javascript-state-machine';
 import * as SocketIO from 'socket.io';
 import * as SourceMapSupport from 'source-map-support';
 
@@ -12,26 +11,27 @@ import Grid from './mazes/grid';
 import PlayersManager from './PlayersManager';
 import StateMachine, { ITransitions } from "./StateMachine";
 import logger from './logger';
-import { IAlgos, GridConnections, gridPayload } from "./_interfaces";
+import { IAlgos, GridConnections, gridPayload, IPlayer } from "./_interfaces";
 import Algos from './mazes/algos';
 import { parsedIdFromStr } from "./mazes/utils";
 SourceMapSupport.install();
 
 const app = express();
 const server = http.createServer(app);
-const io = SocketIO.default(server);
 
+// configure socket.io
+const io = SocketIO.default(server);
 const playersManager = new PlayersManager();
+
 const utils = new Utils();
+let roundStartTime = 0;
+let currentMaze: gridPayload;
 
 const gridConfig = {
-  algo: 'sidewinder',
+  algo: 'aldousBroder',
   rows: 10,
   columns: 10
 };
-
-let roundStartTime = 0;
-let currentMaze: gridPayload;
 
 function generateMaze(props: { algo: string, rows: number, columns: number }): gridPayload {
   logger.debug('app.generating maze');
@@ -50,12 +50,12 @@ function generateMaze(props: { algo: string, rows: number, columns: number }): g
 
 const transitions: ITransitions = {
   'waiting': {
-    duration: (1000 * 5),
+    duration: (1000 * 10),
     to: 'playing',
     from: 'waiting'
   },
   'playing': {
-    duration: (1000 * 1000),
+    duration: (1000 * 13),
     to: 'waiting',
     from: 'playing',
     // name: 'playing'
@@ -88,27 +88,10 @@ const STATEMACHINE = new StateMachine({
   transitions
 });
 
-// function getStateChangePayload(nextStage) {
-//   const payload: { gameState: string; maze?: string } = {
-//     // TODO: ewww
-//     gameState: nextStage
-//   };
-
-//   if (nextStage === 'playing') {
-//     payload.maze = currentMaze;
-//   }
-
-//   return payload;
-// }
-
-function init() {
-  logger.debug('app.initiating game loop');
-  STATEMACHINE.init();
-}
-
 server.listen(config.port, () => {
   console.log(chalk.bgRed.black(`listing on port: ${config.port}`));
-  init();
+  logger.debug('app.initiating game loop');
+  STATEMACHINE.init();
 });
 
 io.on('connection', async socket => {
@@ -159,5 +142,15 @@ io.on('connection', async socket => {
         message: 'successfully changed username'
       });
     }
+  });
+
+  socket.on('debug:time-stop', (date: any) => {
+    console.log('alexalex - ++++++++++', 'STOPPING');
+    STATEMACHINE.stop();
+  });
+
+  socket.on('debug:time-play', (date: any) => {
+    console.log('alexalex - ++++++++++', 'PLAYING');
+    STATEMACHINE.play();
   });
 });

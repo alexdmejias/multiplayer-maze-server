@@ -75,11 +75,17 @@ class StateMachine implements IStateMachine {
     }
   }
 
-  init(): any {
-    const { initTransition } = this;
+  stop() {
+    clearTimeout(this.timer);
+  }
 
+  play() {
+    this._callTransition(this.currentTransition);
+  }
+
+  init(): any {
     // this.methods[this._makeMethodName(initTransition)]();
-    this._callTransition(initTransition);
+    this._callTransition(this.initTransition);
   }
 
 }
