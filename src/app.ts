@@ -111,8 +111,9 @@ server.listen(config.port, () => {
   init();
 });
 
-io.on('connection', socket => {
-  const newPlayer = playersManager.addPlayer(socket.id);
+io.on('connection', async socket => {
+  const newPlayer = playersManager.addPlayer(socket.id, socket.handshake.query.name);
+
   console.log(
     chalk.bgRed.black(`new player joined: ${socket.id} AKA ${newPlayer}`)
   );
