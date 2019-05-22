@@ -82,6 +82,10 @@ class Cell implements ICell {
     return !!this.links[direction];
   }
 
+  hasLinks(): boolean {
+    return !!Object.keys(this.links).length;
+  }
+
   setDistances(distances: { [k: string]: number }) {
     this.distances = distances;
   }

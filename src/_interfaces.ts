@@ -24,7 +24,7 @@ export interface IUtils {
 export interface IPLayersManager {
   players: { [s: string]: IPlayer };
   usernames: string[];
-  addPlayer(newPlayerId: string): string;
+  addPlayer(newPlayerId: string, newPlayerUsername?: string): string;
   removePlayer(playerId: string): boolean;
   playerScored(playerId: string, score: number): number;
   changeUsername(playerId: string, newUsername: string): boolean;
@@ -53,6 +53,7 @@ export interface IGrid {
   print(): string;
   eachCell(): ICell[];
   linkCells(baseCell: CellId, direction: Direction): void;
+  linkCellsById(baseCell: CellId, endCell: CellId): Direction;
 }
 
 export interface IGridConfig {
@@ -91,6 +92,7 @@ export interface ICell {
   // isLinked(cellId: CellId): boolean;
   hasNeighbor(direction: Direction): boolean;
   hasLink(direction: Direction): boolean;
+  hasLinks(): boolean;
   setNeighbors(direction: Direction, neighbors: ICell): void;
   getNeighbors(direction: Direction): ICell;
   setDistances(distances: any): void;

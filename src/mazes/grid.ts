@@ -4,7 +4,7 @@ import Distance from './distance';
 import { IGrid, ICell, IGridConfig, GridConnections, CellDictionary } from '../_interfaces';
 import Algos from './algos';
 import logger from '../logger';
-import { getOppositeDirection, getNeighborPosition, parsedIdFromStr, makeIdFromArr } from './utils';
+import { getOppositeDirection, getNeighborPosition, parsedIdFromStr, makeIdFromArr, getNeighborDirection } from './utils';
 
 class Grid implements IGrid {
   rows: number;
@@ -71,16 +71,22 @@ class Grid implements IGrid {
 
     for (let i = this.rows - 1; i >= 0; i--) {
       for (let j = this.columns - 1; j >= 0; j--) {
-        const hasNorth = i !== 0;
-        const hasEast = j !== (this.columns - 1);
         const cell: ICell = new Cell(i, j);
 
-        if (hasNorth) {
+        if (i !== 0) {
           cell.neighbors.north = makeIdFromArr([i - 1, j]);
         }
 
-        if (hasEast) {
+        if (j !== (this.columns - 1)) {
           cell.neighbors.east = makeIdFromArr([i, j + 1]);
+        }
+
+        if (i !== (this.rows - 1)) {
+          cell.neighbors.south = makeIdFromArr([i + 1, j]);
+        }
+
+        if (j !== 0) {
+          cell.neighbors.west = makeIdFromArr([i, j - 1]);
         }
 
         grid[makeIdFromArr([i, j])] = cell;
@@ -113,8 +119,19 @@ class Grid implements IGrid {
     const newLink = getNeighborPosition(direction, wasd[0], wasd[1]);
     const newLinkId = makeIdFromArr(newLink);
 
-    this.grid2[baseCell].setLink(newLinkId, direction)
+    this.grid2[baseCell].setLink(newLinkId, direction);
     this.grid2[newLinkId].setLink(baseCell, getOppositeDirection(direction));
+  }
+
+  linkCellsById(baseCell: CellId, endCell: CellId): Direction {
+    const direction = getNeighborDirection(baseCell, endCell);
+
+    if (this.grid2[baseCell].hasNeighbor(direction)) {
+      this.grid2[baseCell].setLink(endCell, direction);
+      this.grid2[endCell].setLink(baseCell, getOppositeDirection(direction));
+    }
+
+    return direction;
   }
 
   /**
